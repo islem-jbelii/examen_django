@@ -12,6 +12,11 @@ SECRET_KEY = 'dev-secret'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+# URL to redirect users for login (default is /accounts/login/)
+LOGIN_URL = '/login/'
+# Where to redirect after login
+LOGIN_REDIRECT_URL = '/dashboard/'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

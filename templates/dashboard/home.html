@@ -2,43 +2,86 @@
 {% block page_title %}Tableau de bord{% endblock %}
 
 {% block content %}
-<div class="kpi-grid">
-  <div class="card kpi">
-    <div>Total dossiers</div>
-    <div style="font-size:22px; font-weight:700">{{ total_cases }}</div>
+<style>
+  /* Dashboard-specific tweaks */
+  .kpi-card{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .kpi-value{font-size:26px; font-weight:800}
+  .kpi-label{color:var(--muted); font-size:13px}
+  .kpi-icon{width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));}
+  .charts{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .responsive-canvas{width:100%; height:320px}
+  .table-scroll{max-height:260px; overflow:auto}
+  @media (max-width:900px){ .charts{grid-template-columns:1fr} }
+</style>
+
+<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px">
+  <div>
+    <h1 style="margin:0">Bonjour, {{ user.get_full_name|default:user.username }}</h1>
+    <div style="color:var(--muted); margin-top:6px">Vue d'ensemble de la plateforme</div>
   </div>
-  <div class="card kpi">
-    <div>Total élèves</div>
-    <div style="font-size:22px; font-weight:700">{{ total_students }}</div>
-  </div>
-  <div class="card kpi">
-    <div>Alertes actives</div>
-    <div style="font-size:22px; font-weight:700">{{ alert_count }}</div>
-  </div>
-  <div class="card kpi">
-    <div>Alertes critiques</div>
-    <div style="font-size:22px; font-weight:700">{{ critical_count }}</div>
-  </div>
-  <div class="card kpi">
-    <div>Taux clôture</div>
-    <div style="font-size:22px; font-weight:700">{{ completion_rate|floatformat:2 }}%</div>
+  <div style="display:flex; gap:8px">
+    <a href="/cases/create/"><button>Nouveau dossier</button></a>
+    <a href="/cases/import/"><button class="secondary">Importer CSV</button></a>
   </div>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px">
-  <div class="card">
-    <h3>Dossiers par statut</h3>
-    <canvas id="chartStatus" width="400" height="300"></canvas>
+<div class="kpi-grid">
+  <div class="card kpi-card">
+    <div>
+      <div class="kpi-label">Total dossiers</div>
+      <div class="kpi-value">{{ total_cases }}</div>
+    </div>
+    <div class="kpi-icon">📁</div>
   </div>
+
+  <div class="card kpi-card">
+    <div>
+      <div class="kpi-label">Total élèves</div>
+      <div class="kpi-value">{{ total_students }}</div>
+    </div>
+    <div class="kpi-icon">👨‍🎓</div>
+  </div>
+
+  <div class="card kpi-card">
+    <div>
+      <div class="kpi-label">Alertes actives</div>
+      <div class="kpi-value">{{ alert_count }}</div>
+    </div>
+    <div class="kpi-icon">⚠️</div>
+  </div>
+
+  <div class="card kpi-card">
+    <div>
+      <div class="kpi-label">Alertes critiques</div>
+      <div class="kpi-value">{{ critical_count }}</div>
+    </div>
+    <div class="kpi-icon">🚨</div>
+  </div>
+
+  <div class="card kpi-card">
+    <div>
+      <div class="kpi-label">Taux clôture</div>
+      <div class="kpi-value">{{ completion_rate|floatformat:2 }}%</div>
+    </div>
+    <div class="kpi-icon">✅</div>
+  </div>
+</div>
+
+<div class="charts" style="margin-top:16px">
   <div class="card">
-    <h3>Dossiers par niveau de risque</h3>
-    <canvas id="chartRisk" width="400" height="300"></canvas>
+    <h3 style="margin-top:0">Dossiers par statut</h3>
+    <div class="responsive-canvas"><canvas id="chartStatus"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Dossiers par niveau de risque</h3>
+    <div class="responsive-canvas"><canvas id="chartRisk"></canvas></div>
   </div>
 </div>
 
 <div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-top:16px">
-  <div class="card">
-    <h3>Alertes actives récentes</h3>
+  <div class="card table-scroll">
+    <h3 style="margin-top:0">Alertes actives récentes</h3>
     <table>
       <thead><tr><th>Alerte</th><th>Type</th><th>Créée</th><th>Dossier</th></tr></thead>
       <tbody>
@@ -64,8 +107,8 @@
     </table>
   </div>
 
-  <div class="card">
-    <h3>Dossiers HIGH/CRITICAL ouverts</h3>
+  <div class="card table-scroll">
+    <h3 style="margin-top:0">Dossiers HIGH/CRITICAL ouverts</h3>
     <table>
       <thead><tr><th>Dossier</th><th>Élève</th><th>Risque</th><th>Statut</th></tr></thead>
       <tbody>
@@ -84,15 +127,15 @@
   </div>
 </div>
 
-<div style="margin-top:16px" class="card">
-  <h3>Journal d'audit récent</h3>
+<div style="margin-top:16px" class="card table-scroll">
+  <h3 style="margin-top:0">Journal d'audit récent</h3>
   <table>
     <thead><tr><th>Horaire</th><th>Utilisateur</th><th>Action</th><th>Succès</th></tr></thead>
     <tbody>
       {% for l in recent_logs %}
         <tr>
           <td>{{ l.timestamp }}</td>
-          <td>{{ l.user.username if l.user else 'Anonymous' }}</td>
+          <td>{% if l.user %}{{ l.user.username }}{% else %}Anonymous{% endif %}</td>
           <td>{{ l.action }}</td>
           <td>
             {% if l.success %}
@@ -110,13 +153,11 @@
 </div>
 
 <script>
-  // Données fournies par le contexte
   const statusData = {{ cases_by_status|safe }};
   const riskData = {{ cases_by_risk|safe }};
   const statusLabels = {{ status_labels|safe }};
   const riskLabels = {{ risk_labels|safe }};
 
-  // Convertir objets en arrays pour Chart.js
   function objValues(obj){ return Object.keys(obj).map(k => obj[k]); }
 
   const ctxStatus = document.getElementById('chartStatus').getContext('2d');
@@ -128,7 +169,8 @@
         data: objValues(statusData),
         backgroundColor: ['#3498db','#e67e22','#d81b60','#1a6b3c','#95a5a6']
       }]
-    }
+    },
+    options:{plugins:{legend:{position:'bottom'}}}
   });
 
   const ctxRisk = document.getElementById('chartRisk').getContext('2d');

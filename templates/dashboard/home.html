@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="kpi-grid">
+  <div class="card kpi">
+    <div>Total dossiers</div>
+    <div style="font-size:22px; font-weight:700">{{ total_cases }}</div>
+  </div>
+  <div class="card kpi">
+    <div>Total élèves</div>
+    <div style="font-size:22px; font-weight:700">{{ total_students }}</div>
+  </div>
+  <div class="card kpi">
+    <div>Alertes actives</div>
+    <div style="font-size:22px; font-weight:700">{{ alert_count }}</div>
+  </div>
+  <div class="card kpi">
+    <div>Alertes critiques</div>
+    <div style="font-size:22px; font-weight:700">{{ critical_count }}</div>
+  </div>
+  <div class="card kpi">
+    <div>Taux clôture</div>
+    <div style="font-size:22px; font-weight:700">{{ completion_rate|floatformat:2 }}%</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px">
+  <div class="card">
+    <h3>Dossiers par statut</h3>
+    <canvas id="chartStatus" width="400" height="300"></canvas>
+  </div>
+  <div class="card">
+    <h3>Dossiers par niveau de risque</h3>
+    <canvas id="chartRisk" width="400" height="300"></canvas>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-top:16px">
+  <div class="card">
+    <h3>Alertes actives récentes</h3>
+    <table>
+      <thead><tr><th>Alerte</th><th>Type</th><th>Créée</th><th>Dossier</th></tr></thead>
+      <tbody>
+        {% for a in active_alerts %}
+          <tr>
+            <td>{{ a.message }}</td>
+            <td>{{ a.get_level_display|default:a.level }}</td>
+            <td>{{ a.created_at }}</td>
+            <td>
+              {% if a.case %}
+                <a href="{% url 'case_detail' a.case.pk %}">{{ a.case }}</a>
+              {% elif a.student %}
+                {{ a.student.get_full_name }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Aucune alerte active</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Dossiers HIGH/CRITICAL ouverts</h3>
+    <table>
+      <thead><tr><th>Dossier</th><th>Élève</th><th>Risque</th><th>Statut</th></tr></thead>
+      <tbody>
+        {% for c in high_risk_open %}
+          <tr>
+            <td><a href="{% url 'case_detail' c.pk %}">#{{ c.pk }} {{ c.title }}</a></td>
+            <td>{{ c.student.get_full_name }}</td>
+            <td><span class="badge badge-risk-{{ c.risk_level|default:'NONE' }}">{{ c.risk_level|default:'NONE' }}</span></td>
+            <td><span class="badge badge-status-{{ c.status }}">{{ c.status }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Aucun dossier critique ouvert</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="margin-top:16px" class="card">
+  <h3>Journal d'audit récent</h3>
+  <table>
+    <thead><tr><th>Horaire</th><th>Utilisateur</th><th>Action</th><th>Succès</th></tr></thead>
+    <tbody>
+      {% for l in recent_logs %}
+        <tr>
+          <td>{{ l.timestamp }}</td>
+          <td>{{ l.user.username if l.user else 'Anonymous' }}</td>
+          <td>{{ l.action }}</td>
+          <td>
+            {% if l.success %}
+              <span style="color:var(--primary)">✔</span>
+            {% else %}
+              <span style="color:var(--danger)">✖</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">Aucune entrée</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Données fournies par le contexte
+  const statusData = {{ cases_by_status|safe }};
+  const riskData = {{ cases_by_risk|safe }};
+  const statusLabels = {{ status_labels|safe }};
+  const riskLabels = {{ risk_labels|safe }};
+
+  // Convertir objets en arrays pour Chart.js
+  function objValues(obj){ return Object.keys(obj).map(k => obj[k]); }
+
+  const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+  new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        data: objValues(statusData),
+        backgroundColor: ['#3498db','#e67e22','#d81b60','#1a6b3c','#95a5a6']
+      }]
+    }
+  });
+
+  const ctxRisk = document.getElementById('chartRisk').getContext('2d');
+  new Chart(ctxRisk, {
+    type: 'bar',
+    data: {
+      labels: riskLabels,
+      datasets: [{
+        label: 'Dossiers',
+        data: objValues(riskData),
+        backgroundColor: ['#95a5a6','#1a6b3c','#f39c12','#e67e22','#c0392b']
+      }]
+    },
+    options:{scales:{y:{beginAtZero:true}}}
+  });
+</script>
+
+{% endblock %}

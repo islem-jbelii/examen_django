@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block page_title %}Youth Platform{% endblock %}</title>
+
+  <!-- Chart.js depuis CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+
+  <style>
+    :root{
+      --primary: #1a6b3c; /* vert tunisien */
+      --danger: #c0392b;
+      --warning: #f39c12;
+      --info: #3498db;
+      --muted: #6c757d;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --radius: 8px;
+      --sidebar-width: 240px;
+    }
+
+    /* Reset minimal */
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; background:var(--bg); color:#222}
+
+    /* Sidebar */
+    .sidebar{position:fixed; left:0; top:0; bottom:0; width:var(--sidebar-width); background:linear-gradient(180deg, var(--primary), #14522e); color:#fff; padding:20px 12px; display:flex; flex-direction:column;}
+    .sidebar .brand{font-weight:700; font-size:18px; margin-bottom:12px}
+    .nav{list-style:none; padding:0; margin:8px 0 0}
+    .nav a{display:block; color:#fff; padding:10px 12px; border-radius:6px; text-decoration:none; margin:4px 0}
+    .nav a:hover{background:rgba(255,255,255,0.06)}
+    .sidebar .bottom{margin-top:auto; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06)}
+    .user-badge{display:flex; align-items:center; gap:10px}
+    .role-badge{background:rgba(0,0,0,0.12); color:#fff; padding:4px 8px; border-radius:999px; font-size:12px}
+
+    /* Topbar + content */
+    .main{margin-left:var(--sidebar-width); min-height:100vh;}
+    .topbar{height:64px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 20px; border-bottom:1px solid #e6eaee}
+    .page-title{font-size:18px; font-weight:600}
+    .page-role{padding:6px 10px; border-radius:6px; background:var(--primary); color:#fff; font-size:13px}
+
+    .container{padding:20px;}
+
+    /* Cards & KPIs */
+    .card{background:var(--card); border-radius:var(--radius); box-shadow:0 1px 2px rgba(16,24,40,0.05); padding:16px}
+    .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px}
+    .kpi{padding:12px}
+
+    /* Badges statut */
+    .badge{display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; color:#fff}
+    .badge-status-NEW{background:#3498db} /* bleu */
+    .badge-status-ASSESSMENT{background:#e67e22} /* orange */
+    .badge-status-INTERVENTION{background:#d81b60} /* rose */
+    .badge-status-FOLLOW_UP{background:#1a6b3c} /* vert */
+    .badge-status-CLOSED{background:#95a5a6} /* gris */
+
+    /* Badges risque */
+    .badge-risk-NONE{background:#95a5a6}
+    .badge-risk-LOW{background:var(--primary)}
+    .badge-risk-MEDIUM{background:var(--warning)}
+    .badge-risk-HIGH{background:#e67e22}
+    .badge-risk-CRITICAL{background:var(--danger)}
+
+    /* Tables */
+    table{width:100%; border-collapse:collapse; background:var(--card); border-radius:8px; overflow:hidden}
+    th,td{padding:10px; border-bottom:1px solid #eef3f6; text-align:left}
+    thead th{background:#fbfcfd}
+
+    /* Forms & buttons */
+    form .form-row{margin-bottom:10px}
+    input,select,textarea{width:100%; padding:8px 10px; border:1px solid #dfe6ea; border-radius:6px; background:#fff}
+    button{background:var(--primary); color:#fff; padding:8px 12px; border-radius:6px; border:0; cursor:pointer}
+    button.secondary{background:#fff; color:var(--primary); border:1px solid #e6eaee}
+
+    /* Timeline vertical */
+    .timeline{position:relative; padding-left:20px}
+    .timeline::before{content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:#e6eaee}
+    .timeline-item{position:relative; padding:10px 0 10px 20px}
+    .timeline-item::before{content:''; position:absolute; left:-2px; top:14px; width:12px; height:12px; border-radius:50%; background:var(--primary)}
+
+    /* Progression statut */
+    .status-stepper{display:flex; gap:12px; align-items:center}
+    .status-step{padding:8px 10px; border-radius:8px; background:#f7fafb; font-size:13px}
+    .status-step.active{background:var(--primary); color:#fff}
+
+    /* Alerts */
+    .alerts{margin:12px 0}
+    .alert{padding:10px 12px; border-radius:8px; margin-bottom:8px}
+    .alert.info{background:rgba(52,152,219,0.12); color:var(--info)}
+    .alert.success{background:rgba(26,107,60,0.08); color:var(--primary)}
+    .alert.warning{background:rgba(243,156,18,0.08); color:var(--warning)}
+    .alert.danger{background:rgba(192,57,43,0.08); color:var(--danger)}
+
+    /* Messages Django */
+    .messages{position:fixed; right:20px; top:20px; width:320px; z-index:9999}
+    .messages .msg{margin-bottom:8px}
+
+    @media (max-width:800px){
+      .sidebar{position:relative;width:100%;height:auto}
+      .main{margin-left:0}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="brand">Youth Platform</div>
+    <ul class="nav">
+      <li><a href="/dashboard/">Dashboard</a></li>
+      <li><a href="/cases/">Dossiers</a></li>
+      <li><a href="/cases/create/">Nouveau dossier</a></li>
+      <li><a href="/cases/import/">Import CSV</a></li>
+      <li><a href="/cases/export/">Export CSV</a></li>
+      <li><a href="/cases/thresholds/">Seuils de risque</a></li>
+      <li><a href="/admin/">Admin Django</a></li>
+    </ul>
+
+    <div class="bottom">
+      {% if user.is_authenticated %}
+      <div class="user-badge">
+        <div>
+          <div style="font-weight:700">{{ user.get_full_name|default:user.username }}</div>
+          <div style="font-size:13px; opacity:0.9">{{ user.email }}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <span class="role-badge">{{ user.profile.role|default:'OPERATOR' }}</span>
+      </div>
+      <div style="margin-top:8px">
+        <a href="{% url 'logout' %}" style="color:#fff; text-decoration:underline">Se déconnecter</a>
+      </div>
+      {% else %}
+      <a href="{% url 'login' %}" style="color:#fff">Se connecter</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title">{% block header_title %}Youth Platform{% endblock %}</div>
+      <div>
+        {% if user.is_authenticated and user.profile %}
+          <span class="page-role">{{ user.profile.role }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- Messages Django -->
+      <div class="messages">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="msg alert {% if message.tags %}{{ message.tags }}{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% block content %}{% endblock %}
+
+    </div>
+  </div>
+
+</body>
+</html>

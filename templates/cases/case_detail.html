@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block page_title %}Dossier {{ case.pk }}{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <!-- Progression / header -->
+  <div style="display:flex; justify-content:space-between; align-items:center">
+    <div style="flex:1">
+      <div class="status-stepper">
+        {% for s,label in status_labels.items %}
+          {% with step_class="status-step" %}
+            {% if s == case.status %}
+              {% set active = True %}
+            {% else %}
+              {% set active = False %}
+            {% endif %}
+          {% endwith %}
+          <div class="status-step {% if s == case.status %}active{% endif %}">{{ label }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div style="margin-left:16px; text-align:right">
+      <div style="margin-bottom:8px">
+        <span class="badge badge-risk-{{ case.risk_level|default:'NONE' }}">{{ case.risk_level|default:'NONE' }}</span>
+        {% if case.case_type %}
+          <span class="badge" style="background:#eef; color:#123; margin-left:8px">{{ case.case_type }}</span>
+        {% endif %}
+      </div>
+      {% if available_transitions %}
+        <a href="{% url 'case_transition' case.pk %}" class="button" style="text-decoration:none"><button>Changer le statut</button></a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-top:12px">
+  <div>
+    <div class="card">
+      <h3>Informations élève</h3>
+      <table>
+        <tr><th>Code</th><td>{{ case.student.student_code }}</td></tr>
+        <tr><th>Nom</th><td>{{ case.student.get_full_name }}</td></tr>
+        <tr><th>Âge</th><td>{{ case.student.age }}</td></tr>
+        <tr><th>Région</th><td>{{ case.student.region }}</td></tr>
+        <tr><th>École</th><td>{{ case.student.school_name }}</td></tr>
+        <tr><th>Niveau</th><td>{{ case.student.grade_level }}</td></tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Indicateurs</h3>
+      <table>
+        <tr><th>Absences</th><td>{{ case.absences }}</td></tr>
+        <tr><th>Moyenne</th><td>{{ case.grade_avg }}</td></tr>
+        <tr><th>Séances manquées</th><td>{{ case.missed_sessions }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h3>Alertes actives</h3>
+      {% if alerts %}
+        {% for a in alerts %}
+          <div class="alert warning" style="display:flex; justify-content:space-between; align-items:center">
+            <div>
+              <strong>{{ a.get_level_display|default:a.level }}</strong> — {{ a.message }}
+              <div style="font-size:12px; color:#666">Créée: {{ a.created_at }}</div>
+            </div>
+            <div>
+              <form method="post" action="{% url 'alert_resolve' a.pk %}">{% csrf_token %}
+                <button type="submit" class="secondary">Marquer résolue</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div>Aucune alerte active.</div>
+      {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:12px; background:#fcfcfd">
+      <h3>Recommandation</h3>
+      {% if case.recommendation %}
+        <div style="font-weight:700">{{ case.recommendation }}</div>
+      {% else %}
+        <div>Aucune recommandation</div>
+      {% endif %}
+      <div style="margin-top:8px; background:#fff; padding:8px; border-radius:6px">{{ case.recommendation_explanation|linebreaks }}</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Notes comportementales</h3>
+      <div style="white-space:pre-wrap">{{ case.description|default:'Aucune' }}</div>
+    </div>
+  </div>
+</div>
+
+{% if case.case_type == 'HEALTH' or health_records %}
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+      <h3>Sessions santé</h3>
+      <a href="{% url 'health_record_create' case.pk %}"><button>Ajouter session</button></a>
+    </div>
+    <table>
+      <thead><tr><th>Date</th><th>Type</th><th>Statut</th><th>Praticien</th><th>Notes</th></tr></thead>
+      <tbody>
+        {% for h in health_records %}
+          <tr>
+            <td>{{ h.session_date }}</td>
+            <td>{{ h.session_type|default:'-' }}</td>
+            <td><span class="badge badge-status-{{ h.status }}">{{ h.get_status_display|default:h.status }}</span></td>
+            <td>{{ h.created_by.get_full_name|default:h.created_by.username if h.created_by }}</td>
+            <td style="white-space:pre-wrap">{{ h.notes }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">Aucune session enregistrée</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<div class="card" style="margin-top:12px">
+  <h3>Timeline</h3>
+  <div class="timeline">
+    {% for e in events %}
+      <div class="timeline-item">
+        <div style="font-size:12px; color:#666">{{ e.timestamp }}</div>
+        <div><strong>{{ e.user.get_full_name|default:e.user.username if e.user }}</strong> — {{ e.reason }}</div>
+        {% if e.to_status %}
+          <div style="font-style:italic; color:#444">{{ e.from_status }} → {{ e.to_status }}</div>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div>Aucun événement.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

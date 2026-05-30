@@ -102,6 +102,17 @@
       .sidebar{position:relative;width:100%;height:auto}
       .main{margin-left:0}
     }
+
+    /* Animations & micro-interactions */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px);} to { opacity:1; transform:none; } }
+    .fade-in { animation: fadeInUp .5s ease both; }
+    .opacity-0 { opacity: 0; transform: translateY(8px); }
+    .card{transition:transform .18s ease, box-shadow .18s ease}
+    .card:hover{transform:translateY(-6px); box-shadow:0 8px 20px rgba(16,24,40,0.08)}
+    .kpi-value{transition:transform .4s cubic-bezier(.2,.8,.2,1); display:inline-block}
+    .kpi-count{font-variant-numeric:tabular-nums}
+    .badge{transition:transform .12s ease}
+    .badge:hover{transform:scale(1.04)}
   </style>
 </head>
 <body>

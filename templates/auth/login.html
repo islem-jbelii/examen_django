@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Connexion{% endblock %}
+
+{% block content %}
+  <div style="max-width:480px; margin:20px auto">
+    <h2>Se connecter</h2>
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert danger">Vos identifiants sont invalides.</div>
+      {% endif %}
+
+      <div class="form-row">
+        <label for="id_username">Nom d'utilisateur</label>
+        {{ form.username }}
+      </div>
+
+      <div class="form-row">
+        <label for="id_password">Mot de passe</label>
+        {{ form.password }}
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}" />
+
+      <div style="margin-top:12px">
+        <button type="submit">Se connecter</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

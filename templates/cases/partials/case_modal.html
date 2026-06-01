@@ -1,38 +1,29 @@
 <div style="display:flex; gap:12px; align-items:flex-start">
   <div style="flex:1">
-    <h2>Dossier #{{ case.pk }} {% if case.title %}- {{ case.title }}{% endif %}</h2>
-    <div style="color:var(--muted)">Élève: <strong>{{ case.student.get_full_name }}</strong> — Code: {{ case.student.student_code }}</div>
-
-    <div style="margin-top:10px">
-      <p><strong>Risque:</strong> <span class="badge badge-risk-{{ case.risk_level|default:'NONE' }}">{{ case.risk_level|default:'NONE' }}</span></p>
-      <p><strong>Statut:</strong> <span class="badge badge-status-{{ case.status }}">{{ case.status }}</span></p>
-      <p style="white-space:pre-wrap">{{ case.description|default:'Aucune description' }}</p>
+    <h3>Dossier #{{ case.pk }} — {{ case.title }}</h3>
+    <div style="color:var(--muted); margin-bottom:8px">Élève: {{ case.student.get_full_name }}</div>
+    <div style="margin-top:8px">
+      <strong>Risque:</strong> <span class="badge badge-risk-{{ case.risk_level|default:'NONE' }}">{{ case.risk_level|default:'NONE' }}</span>
     </div>
-
-    <div style="margin-top:12px; display:flex; gap:8px">
-      <a href="/cases/{{ case.pk }}/"><button>Ouvrir le dossier</button></a>
-      <a href="/cases/{{ case.pk }}/transition/"><button class="secondary">Transition</button></a>
+    <div style="margin-top:8px">
+      <strong>Statut:</strong> <span class="badge badge-status-{{ case.status }}">{{ case.status }}</span>
     </div>
+    <div style="margin-top:10px; white-space:pre-wrap">{{ case.description|default:'Aucune description' }}</div>
   </div>
-
-  <div style="width:320px">
-    <div class="card">
-      <h4>Alertes actives</h4>
-      {% if alerts %}
-        {% for a in alerts %}
-          <div class="alert warning" style="margin-bottom:8px">
-            <div style="font-size:13px">{{ a.message }}</div>
-            <div style="font-size:12px; color:var(--muted)">{{ a.created_at }}</div>
-            <div style="margin-top:6px">
-              <form method="post" action="{% url 'alert_resolve' a.pk %}">{% csrf_token %}
-                <button type="submit" class="secondary">Marquer résolue</button>
-              </form>
-            </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <div>Aucune alerte</div>
-      {% endif %}
+  <div style="width:280px">
+    <div style="margin-bottom:8px">
+      <a href="{% url 'case_detail' case.pk %}"><button>Ouvrir le dossier</button></a>
+    </div>
+    <div style="margin-bottom:8px">
+      <a href="/cases/{{ case.pk }}/health_records/create/"><button class="secondary">Ajouter session</button></a>
+    </div>
+    <div style="margin-top:12px">
+      <h4>Alertes</h4>
+      {% for a in alerts %}
+        <div class="alert warning" style="margin-bottom:6px">{{ a.get_level_display|default:a.level }} — {{ a.message }}</div>
+      {% empty %}
+        <div>Aucune alerte active</div>
+      {% endfor %}
     </div>
   </div>
 </div>

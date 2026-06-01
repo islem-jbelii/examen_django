@@ -161,168 +161,78 @@
 </div>
 
 <script>
-  const statusData = {{ cases_by_status|safe }};
-  const riskData = {{ cases_by_risk|safe }};
-  const statusLabels = {{ status_labels|safe }};
-  const riskLabels = {{ risk_labels|safe }};
-
-  function objValues(obj){ return Object.keys(obj).map(k => obj[k]); }
-
-  const ctxStatus = document.getElementById('chartStatus').getContext('2d');
-  new Chart(ctxStatus, {
-    type: 'doughnut',
-    data: {
-      labels: statusLabels,
-      datasets: [{
-        data: objValues(statusData),
-        backgroundColor: ['#3498db','#e67e22','#d81b60','#1a6b3c','#95a5a6']
-      }]
-    },
-    options:{plugins:{legend:{position:'bottom'}}, onClick:(evt, items)=>{
-      if(items.length){
-        const idx = items[0].index;
-        const label = statusLabels[idx];
-        const q = new URLSearchParams(window.location.search);
-        q.set('status', label);
-        window.location = '/cases/?' + q.toString();
-      }
-    }}
-  });
-
-  const ctxRisk = document.getElementById('chartRisk').getContext('2d');
-  new Chart(ctxRisk, {
-    type: 'bar',
-    data: {
-      labels: riskLabels,
-      datasets: [{
-        label: 'Dossiers',
-        data: objValues(riskData),
-        backgroundColor: ['#95a5a6','#1a6b3c','#f39c12','#e67e22','#c0392b']
-      }]
-    },
-    options:{scales:{y:{beginAtZero:true}} , onClick: (evt, items)=>{
-      if(items.length){
-        const idx = items[0].index;
-        const label = riskLabels[idx];
-        // navigate to cases filtered by risk_level
-        const q = new URLSearchParams(window.location.search);
-        q.set('risk_level', label);
-        window.location = '/cases/?' + q.toString();
-      }
-    }}
-  });
-</script>
-<script>
-  // Small animation helpers: count-up and reveal on scroll
   (function(){
+    // Data from context
+    const statusData = {{ cases_by_status|safe }};
+    const riskData = {{ cases_by_risk|safe }};
+    const statusLabels = {{ status_labels|safe }};
+    const riskLabels = {{ risk_labels|safe }};
+
+    function objValues(obj){ return Object.keys(obj).map(k => obj[k]); }
+
+    // Chart defaults for nicer look
+    if(window.Chart && Chart.defaults){
+      Chart.defaults.font.family = 'Inter, system-ui, -apple-system, Segoe UI, Roboto';
+      Chart.defaults.plugins.tooltip.padding = 8;
+      Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0,0,0,0.75)';
+      Chart.defaults.plugins.tooltip.titleColor = '#fff';
+      Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+      Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    }
+
+    // Status doughnut
+    const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+    new Chart(ctxStatus, {
+      type: 'doughnut',
+      data: { labels: statusLabels, datasets: [{ data: objValues(statusData), backgroundColor: ['#3498db','#e67e22','#d81b60','#1a6b3c','#95a5a6'] }] },
+      options:{plugins:{legend:{position:'bottom'}}, onClick:(evt, items)=>{
+        if(items.length){ const idx = items[0].index; const label = statusLabels[idx]; const q = new URLSearchParams(window.location.search); q.set('status', label); window.location = '/cases/?' + q.toString(); }
+      }}
+    });
+
+    // Risk bar
+    const ctxRisk = document.getElementById('chartRisk').getContext('2d');
+    new Chart(ctxRisk, {
+      type: 'bar',
+      data: { labels: riskLabels, datasets: [{ label: 'Dossiers', data: objValues(riskData), backgroundColor: ['#95a5a6','#1a6b3c','#f39c12','#e67e22','#c0392b'] }] },
+      options:{scales:{y:{beginAtZero:true}}, onClick: (evt, items)=>{ if(items.length){ const idx = items[0].index; const label = riskLabels[idx]; const q = new URLSearchParams(window.location.search); q.set('risk_level', label); window.location = '/cases/?' + q.toString(); } }}
+    });
+
+    // Count-up animation
     const duration = 900;
     function animateCount(el, end){
-      end = Number(end) || 0;
-      const start = 0;
-      const startTime = performance.now();
-      function step(ts){
-        const t = Math.min((ts-startTime)/duration,1);
-        const val = Math.floor(t* (end - start) + start);
-        el.textContent = val;
-        if(t<1) requestAnimationFrame(step);
-        else el.textContent = end;
-      }
+      end = Number(end) || 0; const start = 0; const startTime = performance.now();
+      function step(ts){ const t = Math.min((ts-startTime)/duration,1); const val = Math.floor(t*(end-start)+start); el.textContent = val; if(t<1) requestAnimationFrame(step); else el.textContent = end; }
       requestAnimationFrame(step);
     }
 
-    const io = new IntersectionObserver((entries, obs)=>{
-      entries.forEach(entry=>{
-        if(!entry.isIntersecting) return;
-        entry.target.classList.add('fade-in');
-        // animate counts inside the observed card
-        entry.target.querySelectorAll('.kpi-count').forEach(k=>{
-          if(!k.dataset.animated){ animateCount(k, k.dataset.target); k.dataset.animated = '1'; }
-        });
+    // Reveal and animate when visible
+    const io = new IntersectionObserver((entries, obs)=>{ entries.forEach(entry=>{ if(!entry.isIntersecting) return; entry.target.classList.add('fade-in'); entry.target.querySelectorAll('.kpi-count').forEach(k=>{ if(!k.dataset.animated){ animateCount(k, k.dataset.target); k.dataset.animated='1'; } }); obs.unobserve(entry.target); }); }, {threshold:0.18});
 
-  <script>
-    // Table row click-to-open and simple tooltip tuning for charts
-    (function(){
-      document.querySelectorAll('tr.table-row').forEach(r=>{
-        r.addEventListener('click', e=>{
-          const href = r.dataset.href;
-          if(href){
-            // load detail into modal via API
-            const pk = href.match(/\/(\d+)\/?$/); 
-            if(pk && pk[1]){ loadCaseModal(pk[1]); }
-            else { window.location = href; }
-          }
-        });
-        r.addEventListener('keypress', e=>{ if(e.key==='Enter'){ const href=r.dataset.href; if(href) window.location=href; }});
+    document.querySelectorAll('.kpi-card, .card').forEach(el=>{ el.classList.add('opacity-0'); io.observe(el); });
+
+    // Table row click-to-open -> load server-side partial
+    document.querySelectorAll('tr.table-row').forEach(r=>{
+      r.addEventListener('click', e=>{
+        const href = r.dataset.href; if(!href) return; const pkMatch = href.match(/\/(\d+)\/?$/); if(pkMatch && pkMatch[1]){ loadCaseModal(pkMatch[1]); } else { window.location = href; }
       });
+      r.addEventListener('keypress', e=>{ if(e.key==='Enter'){ const href=r.dataset.href; if(href){ const pkMatch = href.match(/\/(\d+)\/?$/); if(pkMatch && pkMatch[1]) loadCaseModal(pkMatch[1]); else window.location = href; } }});
+    });
 
-      // Improve Chart.js tooltips if present
-      if(window.Chart && Chart.defaults){
-        Chart.defaults.font.family = 'Inter, system-ui, -apple-system, Segoe UI, Roboto';
-        Chart.defaults.plugins.tooltip.padding = 8;
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0,0,0,0.75)';
-        Chart.defaults.plugins.tooltip.titleColor = '#fff';
-        Chart.defaults.plugins.tooltip.bodyColor = '#fff';
-        Chart.defaults.plugins.tooltip.cornerRadius = 6;
-      }
-    })();
-  </script>
-
-  <script>
-    // Load case details via API and show in modal
+    // Modal loader using server-side partial
     async function loadCaseModal(casePk){
-      const modal = document.getElementById('detailModal');
-      const content = document.getElementById('detailContent');
-      modal.style.display = 'flex';
-      content.innerHTML = 'Chargement…';
+      const modal = document.getElementById('detailModal'); const content = document.getElementById('detailContent'); modal.style.display = 'flex'; content.innerHTML = 'Chargement…';
       try{
-        const resp = await fetch('/cases/' + casePk + '/modal/', { credentials: 'same-origin' });
-        if(!resp.ok) throw new Error('Erreur serveur');
-        const html = await resp.text();
-        content.innerHTML = html;
+        const resp = await fetch('/cases/' + casePk + '/modal/');
+        if(!resp.ok) throw new Error('Erreur');
+        const html = await resp.text(); content.innerHTML = html;
       }catch(err){ content.innerHTML = '<div>Impossible de charger le dossier.</div>'; }
     }
-
     document.getElementById('detailClose').addEventListener('click', ()=>{ document.getElementById('detailModal').style.display='none'; });
 
-    // Simple client-side pagination for tables with class .table-scroll
-    (function(){
-      const pageSize = 6;
-      document.querySelectorAll('.table-scroll').forEach(card=>{
-        const tbody = card.querySelector('tbody');
-        if(!tbody) return;
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        if(rows.length <= pageSize) return;
-        let page = 0;
-        const totalPages = Math.ceil(rows.length / pageSize);
-        const nav = document.createElement('div');
-        nav.style.marginTop = '8px'; nav.style.display='flex'; nav.style.gap='8px'; nav.style.alignItems='center';
-        const prev = document.createElement('button'); prev.textContent='Préc'; prev.className='secondary';
-        const next = document.createElement('button'); next.textContent='Suiv';
-        const info = document.createElement('div'); info.style.color='var(--muted)';
-        nav.appendChild(prev); nav.appendChild(info); nav.appendChild(next);
-        card.appendChild(nav);
+    // Simple client-side pagination for long tables
+    (function(){ const pageSize = 6; document.querySelectorAll('.table-scroll').forEach(card=>{ const tbody = card.querySelector('tbody'); if(!tbody) return; const rows = Array.from(tbody.querySelectorAll('tr')); if(rows.length <= pageSize) return; let page = 0; const totalPages = Math.ceil(rows.length / pageSize); const nav = document.createElement('div'); nav.style.marginTop='8px'; nav.style.display='flex'; nav.style.gap='8px'; nav.style.alignItems='center'; const prev = document.createElement('button'); prev.textContent='Préc'; prev.className='secondary'; const next = document.createElement('button'); next.textContent='Suiv'; const info = document.createElement('div'); info.style.color='var(--muted)'; nav.appendChild(prev); nav.appendChild(info); nav.appendChild(next); card.appendChild(nav); function render(){ rows.forEach((r,i)=> r.style.display = (i>=page*pageSize && i < (page+1)*pageSize) ? '' : 'none'); info.textContent = 'Page ' + (page+1) + ' / ' + totalPages; prev.disabled = page===0; next.disabled = page===totalPages-1; } prev.addEventListener('click', ()=>{ if(page>0){ page--; render(); } }); next.addEventListener('click', ()=>{ if(page<totalPages-1){ page++; render(); } }); render(); }); })();
 
-        function render(){
-          rows.forEach((r,i)=> r.style.display = (i>=page*pageSize && i < (page+1)*pageSize) ? '' : 'none');
-          info.textContent = 'Page ' + (page+1) + ' / ' + totalPages;
-          prev.disabled = page===0; next.disabled = page===totalPages-1;
-        }
-        prev.addEventListener('click', ()=>{ if(page>0){ page--; render(); } });
-        next.addEventListener('click', ()=>{ if(page<totalPages-1){ page++; render(); } });
-        render();
-      });
-    })();
-  </script>
-        obs.unobserve(entry.target);
-      });
-    }, {threshold:0.18});
-
-    // Observe KPI cards and other cards
-    document.querySelectorAll('.kpi-card, .card').forEach(el=>{
-      // skip very small helper cards
-      el.classList.add('opacity-0');
-      io.observe(el);
-    });
   })();
 </script>
 {% endblock %}

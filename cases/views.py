@@ -138,15 +138,16 @@ def case_detail(request, pk):
 
 @login_required
 def case_modal(request, pk):
-    """Retourne un fragment HTML (partial) contenant un résumé du dossier.
-
-    Conçu pour être chargé dans une modale via AJAX depuis le dashboard.
-    """
+    """Return an HTML partial for a case suitable for loading into the dashboard modal."""
     case = get_object_or_404(Case, pk=pk)
-    alerts = case.alerts.filter(active=True)
+    events = case.events.all()[:6]
+    alerts = case.alerts.filter(active=True)[:6]
+    health_records = case.student.health_records.all()[:6]
     context = {
         'case': case,
+        'events': events,
         'alerts': alerts,
+        'health_records': health_records,
     }
     return render(request, 'cases/partials/case_modal.html', context)
 

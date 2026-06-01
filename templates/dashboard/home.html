@@ -67,6 +67,14 @@
   </div>
 </div>
 
+<!-- Modal for AJAX details -->
+<div id="detailModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:2000">
+  <div style="width:90%; max-width:900px; background:var(--card); border-radius:10px; padding:16px; position:relative">
+    <button id="detailClose" style="position:absolute; right:12px; top:12px; border:0; background:none; font-size:18px">✖</button>
+    <div id="detailContent">Chargement…</div>
+  </div>
+</div>
+
 <div class="charts" style="margin-top:16px">
   <div class="card">
     <h3 style="margin-top:0">Dossiers par statut</h3>
@@ -170,7 +178,15 @@
         backgroundColor: ['#3498db','#e67e22','#d81b60','#1a6b3c','#95a5a6']
       }]
     },
-    options:{plugins:{legend:{position:'bottom'}}}
+    options:{plugins:{legend:{position:'bottom'}}, onClick:(evt, items)=>{
+      if(items.length){
+        const idx = items[0].index;
+        const label = statusLabels[idx];
+        const q = new URLSearchParams(window.location.search);
+        q.set('status', label);
+        window.location = '/cases/?' + q.toString();
+      }
+    }}
   });
 
   const ctxRisk = document.getElementById('chartRisk').getContext('2d');
@@ -184,7 +200,16 @@
         backgroundColor: ['#95a5a6','#1a6b3c','#f39c12','#e67e22','#c0392b']
       }]
     },
-    options:{scales:{y:{beginAtZero:true}}}
+    options:{scales:{y:{beginAtZero:true}} , onClick: (evt, items)=>{
+      if(items.length){
+        const idx = items[0].index;
+        const label = riskLabels[idx];
+        // navigate to cases filtered by risk_level
+        const q = new URLSearchParams(window.location.search);
+        q.set('risk_level', label);
+        window.location = '/cases/?' + q.toString();
+      }
+    }}
   });
 </script>
 <script>
@@ -220,7 +245,12 @@
       document.querySelectorAll('tr.table-row').forEach(r=>{
         r.addEventListener('click', e=>{
           const href = r.dataset.href;
-          if(href){ window.location = href; }
+          if(href){
+            // load detail into modal via API
+            const pk = href.match(/\/(\d+)\/?$/); 
+            if(pk && pk[1]){ loadCaseModal(pk[1]); }
+            else { window.location = href; }
+          }
         });
         r.addEventListener('keypress', e=>{ if(e.key==='Enter'){ const href=r.dataset.href; if(href) window.location=href; }});
       });
@@ -234,6 +264,62 @@
         Chart.defaults.plugins.tooltip.bodyColor = '#fff';
         Chart.defaults.plugins.tooltip.cornerRadius = 6;
       }
+    })();
+  </script>
+
+  <script>
+    // Load case details via API and show in modal
+    async function loadCaseModal(casePk){
+      const modal = document.getElementById('detailModal');
+      const content = document.getElementById('detailContent');
+      modal.style.display = 'flex';
+      content.innerHTML = 'Chargement…';
+      try{
+        const resp = await fetch('/api/cases/' + casePk + '/');
+        if(!resp.ok) throw new Error('Erreur API');
+        const data = await resp.json();
+        // Build a simple HTML summary
+        const html = [];
+        html.push('<h2>Dossier #' + data.id + ' — ' + (data.title||'') + '</h2>');
+        html.push('<div style="display:flex; gap:12px; margin-top:8px">');
+        html.push('<div style="flex:1"><strong>Élève:</strong> ' + (data.student?.first_name||'') + ' ' + (data.student?.last_name||'') + '</div>');
+        html.push('<div><strong>Risque:</strong> <span class="badge badge-risk-' + (data.risk_level||'NONE') + '">' + (data.risk_level||'NONE') + '</span></div>');
+        html.push('</div>');
+        html.push('<p style="margin-top:10px">' + (data.description||'Aucune description') + '</p>');
+        html.push('<div style="margin-top:12px"><a href="/cases/' + data.id + '/">Ouvrir le dossier complet</a></div>');
+        content.innerHTML = html.join('');
+      }catch(err){ content.innerHTML = '<div>Impossible de charger le dossier.</div>'; }
+    }
+
+    document.getElementById('detailClose').addEventListener('click', ()=>{ document.getElementById('detailModal').style.display='none'; });
+
+    // Simple client-side pagination for tables with class .table-scroll
+    (function(){
+      const pageSize = 6;
+      document.querySelectorAll('.table-scroll').forEach(card=>{
+        const tbody = card.querySelector('tbody');
+        if(!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        if(rows.length <= pageSize) return;
+        let page = 0;
+        const totalPages = Math.ceil(rows.length / pageSize);
+        const nav = document.createElement('div');
+        nav.style.marginTop = '8px'; nav.style.display='flex'; nav.style.gap='8px'; nav.style.alignItems='center';
+        const prev = document.createElement('button'); prev.textContent='Préc'; prev.className='secondary';
+        const next = document.createElement('button'); next.textContent='Suiv';
+        const info = document.createElement('div'); info.style.color='var(--muted)';
+        nav.appendChild(prev); nav.appendChild(info); nav.appendChild(next);
+        card.appendChild(nav);
+
+        function render(){
+          rows.forEach((r,i)=> r.style.display = (i>=page*pageSize && i < (page+1)*pageSize) ? '' : 'none');
+          info.textContent = 'Page ' + (page+1) + ' / ' + totalPages;
+          prev.disabled = page===0; next.disabled = page===totalPages-1;
+        }
+        prev.addEventListener('click', ()=>{ if(page>0){ page--; render(); } });
+        next.addEventListener('click', ()=>{ if(page<totalPages-1){ page++; render(); } });
+        render();
+      });
     })();
   </script>
         obs.unobserve(entry.target);

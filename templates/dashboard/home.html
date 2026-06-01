@@ -86,7 +86,7 @@
       <thead><tr><th>Alerte</th><th>Type</th><th>Créée</th><th>Dossier</th></tr></thead>
       <tbody>
         {% for a in active_alerts %}
-          <tr>
+          <tr class="table-row" {% if a.case %}data-href="{% url 'case_detail' a.case.pk %}"{% endif %}>
             <td>{{ a.message }}</td>
             <td>{{ a.get_level_display|default:a.level }}</td>
             <td>{{ a.created_at }}</td>
@@ -113,7 +113,7 @@
       <thead><tr><th>Dossier</th><th>Élève</th><th>Risque</th><th>Statut</th></tr></thead>
       <tbody>
         {% for c in high_risk_open %}
-          <tr>
+          <tr class="table-row" data-href="{% url 'case_detail' c.pk %}">
             <td><a href="{% url 'case_detail' c.pk %}">#{{ c.pk }} {{ c.title }}</a></td>
             <td>{{ c.student.get_full_name }}</td>
             <td><span class="badge badge-risk-{{ c.risk_level|default:'NONE' }}">{{ c.risk_level|default:'NONE' }}</span></td>
@@ -213,6 +213,29 @@
         entry.target.querySelectorAll('.kpi-count').forEach(k=>{
           if(!k.dataset.animated){ animateCount(k, k.dataset.target); k.dataset.animated = '1'; }
         });
+
+  <script>
+    // Table row click-to-open and simple tooltip tuning for charts
+    (function(){
+      document.querySelectorAll('tr.table-row').forEach(r=>{
+        r.addEventListener('click', e=>{
+          const href = r.dataset.href;
+          if(href){ window.location = href; }
+        });
+        r.addEventListener('keypress', e=>{ if(e.key==='Enter'){ const href=r.dataset.href; if(href) window.location=href; }});
+      });
+
+      // Improve Chart.js tooltips if present
+      if(window.Chart && Chart.defaults){
+        Chart.defaults.font.family = 'Inter, system-ui, -apple-system, Segoe UI, Roboto';
+        Chart.defaults.plugins.tooltip.padding = 8;
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0,0,0,0.75)';
+        Chart.defaults.plugins.tooltip.titleColor = '#fff';
+        Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+        Chart.defaults.plugins.tooltip.cornerRadius = 6;
+      }
+    })();
+  </script>
         obs.unobserve(entry.target);
       });
     }, {threshold:0.18});

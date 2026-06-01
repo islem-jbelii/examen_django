@@ -226,9 +226,54 @@
         const resp = await fetch('/cases/' + casePk + '/modal/');
         if(!resp.ok) throw new Error('Erreur');
         const html = await resp.text(); content.innerHTML = html;
+        attachModalHandlers(casePk);
       }catch(err){ content.innerHTML = '<div>Impossible de charger le dossier.</div>'; }
     }
     document.getElementById('detailClose').addEventListener('click', ()=>{ document.getElementById('detailModal').style.display='none'; });
+
+    // CSRF helper
+    function getCookie(name){
+      const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return v ? v.pop() : '';
+    }
+
+    // Attach handlers to dynamic modal content
+    function attachModalHandlers(casePk){
+      // Resolve alert buttons
+      document.querySelectorAll('#detailContent .resolve-alert').forEach(btn=>{
+        btn.addEventListener('click', async e=>{
+          e.preventDefault(); btn.disabled = true; const alertId = btn.dataset.alertId;
+          try{
+            const resp = await fetch('/api/alerts/' + alertId + '/resolve/', { method:'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
+            if(!resp.ok) throw new Error('Erreur');
+            // remove alert element
+            const el = btn.closest('[data-alert-id]'); if(el) el.remove();
+            // decrement KPI alert count
+            document.querySelectorAll('.kpi-count').forEach(k=>{ if(k.dataset.target){ if(k.dataset.target==undefined) return; } });
+            // reload modal to reflect changes
+            loadCaseModal(casePk);
+          }catch(err){ btn.disabled = false; alert('Impossible de résoudre l\'alerte.'); }
+        });
+      });
+
+      // Health form submit
+      const hf = document.querySelector('#detailContent #healthForm');
+      if(hf){
+        hf.addEventListener('submit', async function(e){
+          e.preventDefault(); const form = e.target; const fd = new FormData(form);
+          const session_date = new Date(fd.get('session_date'));
+          const payload = { session_date: session_date.toISOString(), status: fd.get('status'), notes: fd.get('notes') };
+          const submitBtn = form.querySelector('button[type=submit]'); submitBtn.disabled = true;
+          try{
+            const resp = await fetch('/api/cases/' + casePk + '/health_records/', { method:'POST', headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
+            if(!resp.ok) throw new Error('Erreur');
+            // reload modal to show new health record
+            await loadCaseModal(casePk);
+          }catch(err){ alert('Impossible d\'ajouter la séance.'); }
+          finally{ submitBtn.disabled = false; }
+        });
+      }
+    }
 
     // Simple client-side pagination for long tables
     (function(){ const pageSize = 6; document.querySelectorAll('.table-scroll').forEach(card=>{ const tbody = card.querySelector('tbody'); if(!tbody) return; const rows = Array.from(tbody.querySelectorAll('tr')); if(rows.length <= pageSize) return; let page = 0; const totalPages = Math.ceil(rows.length / pageSize); const nav = document.createElement('div'); nav.style.marginTop='8px'; nav.style.display='flex'; nav.style.gap='8px'; nav.style.alignItems='center'; const prev = document.createElement('button'); prev.textContent='Préc'; prev.className='secondary'; const next = document.createElement('button'); next.textContent='Suiv'; const info = document.createElement('div'); info.style.color='var(--muted)'; nav.appendChild(prev); nav.appendChild(info); nav.appendChild(next); card.appendChild(nav); function render(){ rows.forEach((r,i)=> r.style.display = (i>=page*pageSize && i < (page+1)*pageSize) ? '' : 'none'); info.textContent = 'Page ' + (page+1) + ' / ' + totalPages; prev.disabled = page===0; next.disabled = page===totalPages-1; } prev.addEventListener('click', ()=>{ if(page>0){ page--; render(); } }); next.addEventListener('click', ()=>{ if(page<totalPages-1){ page++; render(); } }); render(); }); })();

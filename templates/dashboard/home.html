@@ -29,7 +29,7 @@
   <div class="card kpi-card">
     <div>
       <div class="kpi-label">Total dossiers</div>
-      <div class="kpi-value"><span class="kpi-count" data-target="{{ total_cases }}">0</span></div>
+      <div class="kpi-value"><span class="kpi-count" data-target="{{ total_cases }}" data-kpi="total_cases">0</span></div>
     </div>
     <div class="kpi-icon">📁</div>
   </div>
@@ -37,7 +37,7 @@
   <div class="card kpi-card">
     <div>
       <div class="kpi-label">Total élèves</div>
-      <div class="kpi-value"><span class="kpi-count" data-target="{{ total_students }}">0</span></div>
+      <div class="kpi-value"><span class="kpi-count" data-target="{{ total_students }}" data-kpi="total_students">0</span></div>
     </div>
     <div class="kpi-icon">👨‍🎓</div>
   </div>
@@ -45,7 +45,7 @@
   <div class="card kpi-card">
     <div>
       <div class="kpi-label">Alertes actives</div>
-      <div class="kpi-value"><span class="kpi-count" data-target="{{ alert_count }}">0</span></div>
+      <div class="kpi-value"><span class="kpi-count" data-target="{{ alert_count }}" data-kpi="alert_count">0</span></div>
     </div>
     <div class="kpi-icon">⚠️</div>
   </div>
@@ -53,7 +53,7 @@
   <div class="card kpi-card">
     <div>
       <div class="kpi-label">Alertes critiques</div>
-      <div class="kpi-value"><span class="kpi-count" data-target="{{ critical_count }}">0</span></div>
+      <div class="kpi-value"><span class="kpi-count" data-target="{{ critical_count }}" data-kpi="critical_count">0</span></div>
     </div>
     <div class="kpi-icon">🚨</div>
   </div>
@@ -61,7 +61,7 @@
   <div class="card kpi-card">
     <div>
       <div class="kpi-label">Taux clôture</div>
-      <div class="kpi-value"><span class="kpi-count" data-target="{{ completion_rate|floatformat:0 }}">0</span><span style="color:var(--muted); margin-left:6px">%</span></div>
+      <div class="kpi-value"><span class="kpi-count" data-target="{{ completion_rate|floatformat:0 }}" data-kpi="completion_rate">0</span><span style="color:var(--muted); margin-left:6px">%</span></div>
     </div>
     <div class="kpi-icon">✅</div>
   </div>
@@ -74,6 +74,8 @@
     <div id="detailContent">Chargement…</div>
   </div>
 </div>
+<!-- Toast container -->
+<div id="toasts" style="position:fixed; right:18px; top:18px; z-index:3000"></div>
 
 <div class="charts" style="margin-top:16px">
   <div class="card">
@@ -201,7 +203,7 @@
     // Count-up animation
     const duration = 900;
     function animateCount(el, end){
-      end = Number(end) || 0; const start = 0; const startTime = performance.now();
+      end = Number(end) || 0; const start = Number(el.textContent) || 0; const startTime = performance.now();
       function step(ts){ const t = Math.min((ts-startTime)/duration,1); const val = Math.floor(t*(end-start)+start); el.textContent = val; if(t<1) requestAnimationFrame(step); else el.textContent = end; }
       requestAnimationFrame(step);
     }
@@ -237,22 +239,40 @@
       return v ? v.pop() : '';
     }
 
+    // Toast helper
+    function showToast(message, type='info', timeout=3500){
+      const container = document.getElementById('toasts'); if(!container) return;
+      const t = document.createElement('div'); t.textContent = message; t.style.background='rgba(0,0,0,0.8)'; t.style.color='#fff'; t.style.padding='10px 12px'; t.style.borderRadius='8px'; t.style.marginTop='8px'; t.style.boxShadow='0 4px 14px rgba(16,24,40,0.12)';
+      container.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(()=> t.remove(),400); }, timeout);
+    }
+
+    // Adjust KPI helper
+    function adjustKpi(key, delta){
+      const el = document.querySelector('.kpi-count[data-kpi="' + key + '"]');
+      if(!el) return;
+      const cur = Number(el.dataset.target) || 0; const next = Math.max(0, cur + delta);
+      el.dataset.target = String(next);
+      animateCount(el, next);
+    }
+
     // Attach handlers to dynamic modal content
     function attachModalHandlers(casePk){
       // Resolve alert buttons
       document.querySelectorAll('#detailContent .resolve-alert').forEach(btn=>{
         btn.addEventListener('click', async e=>{
-          e.preventDefault(); btn.disabled = true; const alertId = btn.dataset.alertId;
+          e.preventDefault(); btn.disabled = true; const alertId = btn.dataset.alertId; const alertEl = btn.closest('[data-alert-id]'); const level = alertEl ? alertEl.dataset.alertLevel : null;
           try{
             const resp = await fetch('/api/alerts/' + alertId + '/resolve/', { method:'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } });
             if(!resp.ok) throw new Error('Erreur');
             // remove alert element
-            const el = btn.closest('[data-alert-id]'); if(el) el.remove();
+            if(alertEl) alertEl.remove();
             // decrement KPI alert count
-            document.querySelectorAll('.kpi-count').forEach(k=>{ if(k.dataset.target){ if(k.dataset.target==undefined) return; } });
+            adjustKpi('alert_count', -1);
+            if(level && level.toLowerCase().includes('critical')){ adjustKpi('critical_count', -1); }
+            showToast('Alerte résolue.', 'success');
             // reload modal to reflect changes
             loadCaseModal(casePk);
-          }catch(err){ btn.disabled = false; alert('Impossible de résoudre l\'alerte.'); }
+          }catch(err){ btn.disabled = false; showToast('Impossible de résoudre l\'alerte.', 'danger'); }
         });
       });
 
@@ -267,9 +287,18 @@
           try{
             const resp = await fetch('/api/cases/' + casePk + '/health_records/', { method:'POST', headers: { 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') }, body: JSON.stringify(payload) });
             if(!resp.ok) throw new Error('Erreur');
+            const data = await resp.json();
+            // if session marked MIS, show toast and possibly refresh alerts
+            if(data.status && data.status.toUpperCase().includes('MIS')){
+              showToast('Séance manquée enregistrée — une alerte peut avoir été créée.', 'warning');
+              // optimistic increment of alert_count
+              adjustKpi('alert_count', 1);
+            } else {
+              showToast('Séance ajoutée.', 'success');
+            }
             // reload modal to show new health record
             await loadCaseModal(casePk);
-          }catch(err){ alert('Impossible d\'ajouter la séance.'); }
+          }catch(err){ showToast('Impossible d\'ajouter la séance.', 'danger'); }
           finally{ submitBtn.disabled = false; }
         });
       }

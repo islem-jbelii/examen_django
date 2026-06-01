@@ -19,13 +19,13 @@
     </div>
     <div style="margin-top:12px">
       <h4>Alertes</h4>
-      {% for a in alerts %}
-        <div class="alert warning" style="margin-bottom:6px; display:flex; justify-content:space-between; align-items:center" data-alert-id="{{ a.pk }}">
-          <div>{{ a.get_level_display|default:a.level }} — {{ a.message }}</div>
-          <div>
-            <button class="resolve-alert secondary" data-alert-id="{{ a.pk }}">Marquer résolue</button>
+        {% for a in alerts %}
+          <div class="alert warning" style="margin-bottom:6px; display:flex; justify-content:space-between; align-items:center" data-alert-id="{{ a.pk }}" data-alert-level="{{ a.level }}">
+            <div>{{ a.get_level_display|default:a.level }} — {{ a.message }}</div>
+            <div>
+              <button class="resolve-alert secondary" data-alert-id="{{ a.pk }}">Marquer résolue</button>
+            </div>
           </div>
-        </div>
       {% empty %}
         <div>Aucune alerte active</div>
       {% endfor %}
@@ -35,13 +35,13 @@
 <hr />
 <div style="margin-top:12px">
   <h4>Ajouter une séance santé</h4>
-  <form id="healthForm">
+      <form id="healthForm">
     <div style="display:flex; gap:8px">
       <input type="datetime-local" name="session_date" required />
       <select name="status">
         <option value="SCHEDULED">Planifié</option>
         <option value="ATTENDED">Présent</option>
-        <option value="MISSED">Manqué</option>
+        <option value="MIS">Manqué</option>
         <option value="CANCELLED">Annulé</option>
       </select>
     </div>

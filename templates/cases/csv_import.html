@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Import CSV</h1>
+
+<div class="card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Importer</button>
+  </form>
+</div>
+
+{% if report %}
+  <div class="card" style="margin-top:16px">
+    <h3>Rapport d'import</h3>
+    <p>Valid rows: {{ report.valid_rows }} — Errors: {{ report.error_rows }} — Imported: {{ report.imported }} — Total: {{ report.total }}</p>
+    {% if report.errors %}
+      <table class="table">
+        <thead><tr><th>Ligne</th><th>Erreur</th></tr></thead>
+        <tbody>
+          {% for e in report.errors %}
+            <tr><td>{{ e.row }}</td><td>{{ e.reason }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% endblock %}

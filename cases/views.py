@@ -137,6 +137,21 @@ def case_detail(request, pk):
 
 
 @login_required
+def case_modal(request, pk):
+    """Retourne un fragment HTML (partial) contenant un résumé du dossier.
+
+    Conçu pour être chargé dans une modale via AJAX depuis le dashboard.
+    """
+    case = get_object_or_404(Case, pk=pk)
+    alerts = case.alerts.filter(active=True)
+    context = {
+        'case': case,
+        'alerts': alerts,
+    }
+    return render(request, 'cases/partials/case_modal.html', context)
+
+
+@login_required
 def case_create(request):
     if request.method == 'POST':
         form = CaseForm(request.POST)

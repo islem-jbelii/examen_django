@@ -275,19 +275,10 @@
       modal.style.display = 'flex';
       content.innerHTML = 'Chargement…';
       try{
-        const resp = await fetch('/api/cases/' + casePk + '/');
-        if(!resp.ok) throw new Error('Erreur API');
-        const data = await resp.json();
-        // Build a simple HTML summary
-        const html = [];
-        html.push('<h2>Dossier #' + data.id + ' — ' + (data.title||'') + '</h2>');
-        html.push('<div style="display:flex; gap:12px; margin-top:8px">');
-        html.push('<div style="flex:1"><strong>Élève:</strong> ' + (data.student?.first_name||'') + ' ' + (data.student?.last_name||'') + '</div>');
-        html.push('<div><strong>Risque:</strong> <span class="badge badge-risk-' + (data.risk_level||'NONE') + '">' + (data.risk_level||'NONE') + '</span></div>');
-        html.push('</div>');
-        html.push('<p style="margin-top:10px">' + (data.description||'Aucune description') + '</p>');
-        html.push('<div style="margin-top:12px"><a href="/cases/' + data.id + '/">Ouvrir le dossier complet</a></div>');
-        content.innerHTML = html.join('');
+        const resp = await fetch('/cases/' + casePk + '/modal/', { credentials: 'same-origin' });
+        if(!resp.ok) throw new Error('Erreur serveur');
+        const html = await resp.text();
+        content.innerHTML = html;
       }catch(err){ content.innerHTML = '<div>Impossible de charger le dossier.</div>'; }
     }
 

@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/modal/', views.case_modal, name='case_modal'),
     path('thresholds/', views.risk_threshold_list, name='risk_threshold_list'),
     path('export/', views.export_cases_csv, name='export_cases'),
+    path('import/', views.csv_import, name='csv_import'),
 ]

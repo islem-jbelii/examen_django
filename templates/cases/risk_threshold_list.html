@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Seuils de risque</h1>
+
+<div class="card">
+  <h3>Créer un seuil</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Créer</button>
+  </form>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3>Seuils existants</h3>
+  <table class="table">
+    <thead>
+      <tr><th>Indicateur</th><th>Opérateur</th><th>Valeur</th><th>Niveau</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      {% for t in thresholds %}
+        <tr>
+          <td>{{ t.get_indicator_display }}</td>
+          <td>{{ t.get_operator_display }}</td>
+          <td>{{ t.threshold_value }}</td>
+          <td>{{ t.get_risk_level_display }}</td>
+          <td>{{ t.description }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">Aucun seuil défini.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

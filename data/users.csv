@@ -1,0 +1,32 @@
+username,first_name,last_name,email,role,password,is_active
+synth_counselor1,Sonia,Ben Salah,counselor1@careerpathtn.tn,COUNSELOR,synth123,True
+synth_counselor2,Hedi,Maaloul,counselor2@careerpathtn.tn,COUNSELOR,synth123,True
+synth_mentor1,Karim,Trabelsi,mentor1@careerpathtn.tn,MENTOR,synth123,True
+synth_mentor2,Fatma,Chaabane,mentor2@careerpathtn.tn,MENTOR,synth123,True
+synth_mentor3,Walid,Gharbi,mentor3@careerpathtn.tn,MENTOR,synth123,True
+synth_mentor4,Rania,Jebali,mentor4@careerpathtn.tn,MENTOR,synth123,True
+synth_youth1,Ahmed,Mansouri,youth1@careerpathtn.tn,YOUTH,synth123,True
+synth_youth2,Mariem,Khelifi,youth2@careerpathtn.tn,YOUTH,synth123,True
+synth_youth3,Youssef,Dridi,youth3@careerpathtn.tn,YOUTH,synth123,True
+synth_youth4,Ines,Ferchichi,youth4@careerpathtn.tn,YOUTH,synth123,True
+synth_youth5,Amine,Bouzid,youth5@careerpathtn.tn,YOUTH,synth123,True
+synth_youth6,Salma,Saidi,youth6@careerpathtn.tn,YOUTH,synth123,True
+synth_youth7,Tarek,Ayari,youth7@careerpathtn.tn,YOUTH,synth123,True
+synth_youth8,Nour,Belhaj,youth8@careerpathtn.tn,YOUTH,synth123,True
+synth_youth9,Bilel,Chtioui,youth9@careerpathtn.tn,YOUTH,synth123,True
+synth_youth10,Yasmine,Zouari,youth10@careerpathtn.tn,YOUTH,synth123,True
+synth_youth11,Rami,Tlili,youth11@careerpathtn.tn,YOUTH,synth123,True
+synth_youth12,Hajer,Guesmi,youth12@careerpathtn.tn,YOUTH,synth123,True
+synth_youth13,Sami,Nasr,youth13@careerpathtn.tn,YOUTH,synth123,True
+synth_youth14,Asma,Ben Ali,youth14@careerpathtn.tn,YOUTH,synth123,True
+synth_youth15,Nizar,Hamdi,youth15@careerpathtn.tn,YOUTH,synth123,True
+synth_youth16,Dorra,Slim,youth16@careerpathtn.tn,YOUTH,synth123,True
+synth_youth17,Maher,Fares,youth17@careerpathtn.tn,YOUTH,synth123,True
+synth_youth18,Olfa,Rim,youth18@careerpathtn.tn,YOUTH,synth123,True
+synth_youth19,Fares,Lina,youth19@careerpathtn.tn,YOUTH,synth123,True
+synth_youth20,Slim,Amira,youth20@careerpathtn.tn,YOUTH,synth123,True
+synth_youth21,Wafa,Tlili,youth21@careerpathtn.tn,YOUTH,synth123,True
+synth_youth22,Khaled,Maaloul,youth22@careerpathtn.tn,YOUTH,synth123,True
+synth_youth23,Lina,Saidi,youth23@careerpathtn.tn,YOUTH,synth123,True
+synth_youth24,Omar,Bouzid,youth24@careerpathtn.tn,YOUTH,synth123,True
+synth_youth25,Rim,Gharbi,youth25@careerpathtn.tn,YOUTH,synth123,True

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ sector.name }} — CareerPathTN{% endblock %}
+{% block content %}
+<h2 class="mb-2"><i class="bi bi-briefcase"></i> {{ sector.name }}</h2>
+<p class="text-muted">{{ sector.description }}</p>
+<div class="row g-2 mb-4">
+  <div class="col-auto"><span class="badge {% if sector.demand_level == 'HIGH' %}bg-success{% elif sector.demand_level == 'MEDIUM' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">Demande : {{ sector.get_demand_level_display }}</span></div>
+  <div class="col-auto"><span class="badge bg-light text-dark border">Salaire : {{ sector.average_salary_range|default:"N/A" }}</span></div>
+  <div class="col-auto"><span class="badge bg-light text-dark border">Éducation : {{ sector.required_education_level|default:"N/A" }}</span></div>
+</div>
+<h4>Métiers disponibles</h4>
+<div class="row g-3">
+  {% for path in paths %}
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="card-title">{{ path.title }}</h6>
+        <p class="small text-muted">{{ path.description|truncatechars:80 }}</p>
+        <small class="text-muted"><i class="bi bi-clock"></i> {{ path.training_duration_months }} mois de formation</small>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'careers:career-path-detail' path.pk %}" class="btn btn-sm btn-outline-primary w-100">Détails</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col"><p class="text-muted">Aucun métier disponible dans ce secteur.</p></div>
+  {% endfor %}
+</div>
+<a href="{% url 'careers:sector-list' %}" class="btn btn-outline-secondary mt-3"><i class="bi bi-arrow-left"></i> Retour</a>
+{% endblock %}

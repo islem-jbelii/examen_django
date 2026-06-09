@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Résultat de l'évaluation — CareerPathTN{% endblock %}
+{% block page_title %}Résultat de l'évaluation{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="alert alert-success d-flex align-items-center gap-3 mb-4">
+      <i class="bi bi-check-circle-fill fs-3"></i>
+      <div>
+        <strong>Évaluation complétée !</strong><br>
+        Conduite le {{ assessment.assessment_date|date:"d/m/Y" }} pour
+        <strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong>.
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Secteurs recommandés</div>
+      <div class="card-body">
+        {% for sector in assessment.recommended_sectors.all %}
+        <div class="d-flex align-items-center gap-3 mb-3 p-3 border rounded">
+          <div class="flex-grow-1">
+            <h6 class="mb-1">{{ sector.name }}</h6>
+            <p class="text-muted small mb-1">{{ sector.description|truncatechars:120 }}</p>
+            <span class="badge {% if sector.demand_level == 'HIGH' %}bg-success{% elif sector.demand_level == 'MEDIUM' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              Demande : {{ sector.get_demand_level_display }}
+            </span>
+          </div>
+          <a href="{% url 'careers:sector-detail' sector.pk %}" class="btn btn-sm btn-outline-primary">
+            Explorer <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        {% empty %}
+        <p class="text-muted">Aucun secteur recommandé (scores insuffisants).</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if assessment.score_breakdown %}
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Détail des scores par secteur</div>
+      <div class="card-body">
+        {% for sector_name, pts in assessment.score_breakdown.items %}
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span style="min-width:140px" class="small">{{ sector_name }}</span>
+          <div class="progress flex-grow-1" style="height:14px;">
+            <div class="progress-bar bg-info" style="width:{% widthratio pts 25 100 %}%"></div>
+          </div>
+          <span class="small fw-bold" style="min-width:30px">{{ pts }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'youth:profile-detail' profile.pk %}?tab=assessment" class="btn btn-primary">
+        <i class="bi bi-person"></i> Retour au profil
+      </a>
+      <a href="{% url 'guidance:plan-create' %}?youth={{ profile.pk }}" class="btn btn-outline-warning">
+        <i class="bi bi-journal-plus"></i> Créer un plan d'action
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

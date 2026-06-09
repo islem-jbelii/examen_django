@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Alertes — CareerPathTN{% endblock %}
+{% block page_title %}Alertes{% endblock %}
+{% block nav_alerts %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item active">Alertes</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">
+    <i class="bi bi-bell me-2"></i>Alertes
+    {% if unread_total %}
+    <span class="badge bg-danger ms-1">{{ unread_total }} non lues</span>
+    {% endif %}
+  </h4>
+  {% if unread_total %}
+  <a href="{% url 'alerts:mark-all-read' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-check-all"></i> Tout marquer comme lu
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small mb-1">Type</label>
+        <select name="alert_type" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in type_choices %}
+            <option value="{{ val }}" {% if current_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Sévérité</label>
+        <select name="severity" class="form-select form-select-sm">
+          <option value="">Toutes</option>
+          {% for val, label in severity_choices %}
+            <option value="{{ val }}" {% if current_severity == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Lu</label>
+        <select name="is_read" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          <option value="0" {% if current_read == '0' %}selected{% endif %}>Non lus</option>
+          <option value="1" {% if current_read == '1' %}selected{% endif %}>Lus</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-1">
+        <button type="submit" class="btn btn-sm btn-primary flex-fill">
+          <i class="bi bi-funnel"></i> Filtrer
+        </button>
+        <a href="{% url 'alerts:alert-list' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Jeune</th>
+            <th>Type</th>
+            <th>Sévérité</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Lu</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in alerts %}
+          <tr class="{% if not alert.is_read %}fw-semibold{% endif %}">
+            <td>
+              <a href="{% url 'youth:profile-detail' alert.youth.pk %}?tab=alerts" class="text-decoration-none">
+                {{ alert.youth.user.get_full_name|default:alert.youth.user.username }}
+              </a>
+            </td>
+            <td><span class="badge bg-light text-dark border">{{ alert.get_alert_type_display }}</span></td>
+            <td>
+              <span class="badge {% if alert.severity == 'HIGH' %}bg-danger{% elif alert.severity == 'MEDIUM' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {{ alert.get_severity_display }}
+              </span>
+            </td>
+            <td class="small">{{ alert.message|truncatechars:80 }}</td>
+            <td class="small text-muted">{{ alert.created_at|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if alert.is_read %}
+                <i class="bi bi-check-circle-fill text-success"></i>
+              {% else %}
+                <i class="bi bi-circle text-warning"></i>
+              {% endif %}
+            </td>
+            <td>
+              {% if not alert.is_read %}
+              <a href="{% url 'alerts:mark-read' alert.pk %}" class="btn btn-sm btn-outline-secondary">
+                Marquer lu
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              <i class="bi bi-bell-slash display-6 d-block mb-2"></i>
+              Aucune alerte.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="card-footer">
+    {% include "partials/pagination.html" %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

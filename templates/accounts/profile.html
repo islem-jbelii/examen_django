@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Mon Profil — CareerPathTN{% endblock %}
+{% block page_title %}Mon Profil{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item active">Mon profil</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-person-circle me-2"></i>Informations du compte
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Nom complet</dt>
+          <dd class="col-sm-8">{{ user.get_full_name|default:"—" }}</dd>
+          <dt class="col-sm-4">Nom d'utilisateur</dt>
+          <dd class="col-sm-8"><code>{{ user.username }}</code></dd>
+          <dt class="col-sm-4">Email</dt>
+          <dd class="col-sm-8">{{ user.email|default:"—" }}</dd>
+          <dt class="col-sm-4">Rôle</dt>
+          <dd class="col-sm-8">
+            <span class="badge
+              {% if user.role == 'ADMIN' %}bg-danger
+              {% elif user.role == 'COUNSELOR' %}bg-warning text-dark
+              {% elif user.role == 'MENTOR' %}bg-success
+              {% else %}bg-info text-dark{% endif %}">
+              {{ user.get_role_display }}
+            </span>
+          </dd>
+          <dt class="col-sm-4">Membre depuis</dt>
+          <dd class="col-sm-8">{{ user.date_joined|date:"d/m/Y" }}</dd>
+          <dt class="col-sm-4">Dernière connexion</dt>
+          <dd class="col-sm-8">{{ user.last_login|date:"d/m/Y H:i"|default:"—" }}</dd>
+        </dl>
+        <a href="{% url 'dashboard:redirect' %}" class="btn btn-outline-danger">
+          <i class="bi bi-speedometer2 me-1"></i>Tableau de bord
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

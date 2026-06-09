@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Profil non créé — CareerPathTN{% endblock %}
+{% block page_title %}Profil non créé{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6">
+    <div class="alert alert-warning d-flex align-items-center gap-3">
+      <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+      <div>
+        <h5 class="mb-1">Profil non créé</h5>
+        <p class="mb-0">Votre profil jeune n'a pas encore été créé. Contactez votre conseiller d'orientation.</p>
+      </div>
+    </div>
+    <a href="{% url 'dashboard:redirect' %}" class="btn btn-outline-warning">
+      <i class="bi bi-house me-1"></i>Retour au tableau de bord
+    </a>
+  </div>
+</div>
+{% endblock %}

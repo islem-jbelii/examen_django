@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Mon Espace — CareerPathTN{% endblock %}
+{% block page_title %}Mon Espace Orientation{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active">Mon espace</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+{% if profile %}
+
+<!-- Score card -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card text-center h-100">
+      <div class="card-body d-flex flex-column justify-content-center py-4">
+        <div class="display-3 fw-bold {% if readiness_score >= 70 %}score-high{% elif readiness_score >= 40 %}score-mid{% else %}score-low{% endif %}">
+          {{ readiness_score }}
+        </div>
+        <div class="text-muted mb-2">/ 100 — Score de préparation</div>
+        <div class="progress mx-3" style="height:12px;border-radius:6px;">
+          <div class="progress-bar {% if readiness_score >= 70 %}score-bar-high{% elif readiness_score >= 40 %}score-bar-mid{% else %}score-bar-low{% endif %}"
+               style="width:{{ readiness_score }}%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header fw-semibold">Détail du score</div>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0 small">
+          {% if score_breakdown.assessment_completed %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-check-circle-fill text-success me-1"></i>Évaluation complétée</span>
+            <strong class="text-success">+{{ score_breakdown.assessment_completed }}</strong>
+          </li>
+          {% endif %}
+          {% if score_breakdown.active_action_plan %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-check-circle-fill text-success me-1"></i>Plan d'action actif</span>
+            <strong class="text-success">+{{ score_breakdown.active_action_plan }}</strong>
+          </li>
+          {% endif %}
+          {% if score_breakdown.interest_sectors %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-check-circle-fill text-success me-1"></i>Secteurs d'intérêt</span>
+            <strong class="text-success">+{{ score_breakdown.interest_sectors }}</strong>
+          </li>
+          {% endif %}
+          {% if score_breakdown.education_level %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-check-circle-fill text-success me-1"></i>Niveau d'éducation</span>
+            <strong class="text-success">+{{ score_breakdown.education_level }}</strong>
+          </li>
+          {% endif %}
+          {% if score_breakdown.mentor_with_session %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-check-circle-fill text-success me-1"></i>Mentor + séance</span>
+            <strong class="text-success">+{{ score_breakdown.mentor_with_session }}</strong>
+          </li>
+          {% endif %}
+          {% if score_breakdown.inactive_penalty %}
+          <li class="d-flex justify-content-between py-1">
+            <span><i class="bi bi-x-circle-fill text-danger me-1"></i>Pénalité inactivité</span>
+            <strong class="text-danger">{{ score_breakdown.inactive_penalty }}</strong>
+          </li>
+          {% endif %}
+          {% if not score_breakdown %}
+          <li class="text-muted">Complétez votre profil pour obtenir un score.</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header fw-semibold">Mon profil</div>
+      <div class="card-body">
+        <dl class="row small mb-0">
+          <dt class="col-6">Gouvernorat</dt>
+          <dd class="col-6">{{ profile.get_governorate_display }}</dd>
+          <dt class="col-6">Éducation</dt>
+          <dd class="col-6">{{ profile.get_education_level_display }}</dd>
+          <dt class="col-6">Statut</dt>
+          <dd class="col-6"><span class="badge badge-{{ profile.status }}">{{ profile.get_status_display }}</span></dd>
+          <dt class="col-6">Conseiller</dt>
+          <dd class="col-6">{{ profile.assigned_counselor.get_full_name|default:"—" }}</dd>
+          <dt class="col-6">Mentor</dt>
+          <dd class="col-6">{{ profile.assigned_mentor.get_full_name|default:"—" }}</dd>
+        </dl>
+        <a href="{% url 'youth:profile-detail' profile.pk %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
+          <i class="bi bi-person-lines-fill me-1"></i>Voir mon profil complet
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Plans -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-journal-text me-1"></i>Mes plans d'action
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for plan in plans %}
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <div>
+              <div class="fw-semibold small">{{ plan.target_sector }}</div>
+              <div class="text-muted" style="font-size:.75rem">{{ plan.start_date|date:"d/m/Y" }} → {{ plan.end_date|date:"d/m/Y" }}</div>
+            </div>
+            <span class="badge {% if plan.status == 'ACTIVE' %}bg-success{% else %}bg-primary{% endif %}">
+              {{ plan.get_status_display }}
+            </span>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted text-center py-3">Aucun plan actif.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sessions -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-calendar3 me-1"></i>Mes séances récentes
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Date</th><th>Type</th><th>Statut</th></tr>
+          </thead>
+          <tbody>
+            {% for session in recent_sessions %}
+            <tr>
+              <td class="small">{{ session.session_date|date:"d/m/Y" }}</td>
+              <td class="small">{{ session.get_session_type_display }}</td>
+              <td>
+                <span class="badge badge-{{ session.status }}" style="font-size:.7rem">
+                  {{ session.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted py-3">Aucune séance.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4">
+  <a href="{% url 'careers:sector-list' %}" class="btn btn-outline-primary">
+    <i class="bi bi-briefcase me-1"></i>Explorer les secteurs professionnels
+  </a>
+</div>
+
+{% else %}
+<div class="alert alert-warning d-flex align-items-center gap-3">
+  <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+  <div>
+    <strong>Profil non créé</strong><br>
+    Votre profil n'a pas encore été créé. Contactez votre conseiller d'orientation.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

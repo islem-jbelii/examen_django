@@ -1,0 +1,5 @@
+username,sector_name,company_name,years_of_experience,bio,availability,max_youth_capacity,current_youth_count,is_verified
+synth_mentor1,Informatique,TechTunisia SARL,8,Développeur senior spécialisé en applications web et mobile. Passionné par le mentorat des jeunes talents tunisiens.,AVAILABLE,4,0,True
+synth_mentor2,Santé,Clinique El Amal,12,Infirmière cheffe avec 12 ans d'expérience en soins intensifs. Engagée dans la formation des futurs professionnels de santé.,AVAILABLE,3,0,True
+synth_mentor3,Commerce,Groupe Aziz Distribution,7,Responsable commercial avec expertise en grande distribution et marketing digital. Mentor bénévole depuis 3 ans.,AVAILABLE,3,0,True
+synth_mentor4,Ingénierie,Bureau d'études STEG,10,Ingénieure en génie civil spécialisée dans les infrastructures hydrauliques. Passionnée par la transmission du savoir.,BUSY,2,0,True

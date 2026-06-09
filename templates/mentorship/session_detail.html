@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Séance — CareerPathTN{% endblock %}
+{% block page_title %}Détail de la séance{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between">
+        <span class="fw-semibold">{{ session.get_session_type_display }}</span>
+        <span class="badge badge-{{ session.status }}">{{ session.get_status_display }}</span>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Jeune</dt>
+          <dd class="col-sm-8">{{ session.youth.user.get_full_name|default:session.youth.user.username }}</dd>
+          <dt class="col-sm-4">Mentor</dt>
+          <dd class="col-sm-8">{{ session.mentor.get_full_name|default:session.mentor.username }}</dd>
+          <dt class="col-sm-4">Date</dt>
+          <dd class="col-sm-8">{{ session.session_date|date:"d/m/Y" }}</dd>
+          <dt class="col-sm-4">Type</dt>
+          <dd class="col-sm-8">{{ session.get_session_type_display }}</dd>
+          <dt class="col-sm-4">Notes</dt>
+          <dd class="col-sm-8">{{ session.notes|default:"—" }}</dd>
+          <dt class="col-sm-4">Recommandations</dt>
+          <dd class="col-sm-8">{{ session.recommendations|default:"—" }}</dd>
+          <dt class="col-sm-4">Conseiller notifié</dt>
+          <dd class="col-sm-8">
+            {% if session.counselor_notified %}
+              <i class="bi bi-check-circle-fill text-success"></i> Oui
+            {% else %}
+              <i class="bi bi-x-circle text-muted"></i> Non
+            {% endif %}
+          </dd>
+        </dl>
+        <div class="d-flex gap-2 mt-3">
+          {% if user.role == 'MENTOR' or user.role == 'COUNSELOR' or user.role == 'ADMIN' %}
+          <a href="{% url 'mentorship:session-update' session.pk %}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-pencil"></i> Modifier
+          </a>
+          {% endif %}
+          <a href="{% url 'mentorship:session-list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

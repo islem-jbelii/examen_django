@@ -1,0 +1,21 @@
+youth_username,alert_type,severity,message,triggered_by,is_read
+synth_youth4,MISSED_SESSIONS,HIGH,2 séances de mentorat consécutives manquées pour Ines Ferchichi. Vérifier la disponibilité du jeune.,system,False
+synth_youth10,MISSED_SESSIONS,HIGH,2 séances de mentorat consécutives manquées pour Yasmine Zouari. Contacter le mentor.,system,False
+synth_youth17,INACTIVITY,HIGH,Khaled Slim est marqué comme inactif. Situation familiale difficile signalée.,system,False
+synth_youth11,ASSESSMENT_REQUIRED,MEDIUM,Bilel Bouzid n'a pas encore complété son évaluation d'intérêts. Planifier une séance.,system,False
+synth_youth5,ASSESSMENT_REQUIRED,MEDIUM,Amine Bouzid n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth8,ASSESSMENT_REQUIRED,MEDIUM,Nour Belhaj n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth14,ASSESSMENT_REQUIRED,MEDIUM,Asma Ben Ali n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth19,ASSESSMENT_REQUIRED,MEDIUM,Fares Lina n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth23,ASSESSMENT_REQUIRED,MEDIUM,Omar Bouzid n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth25,ASSESSMENT_REQUIRED,MEDIUM,Slim Amira n'a pas encore complété son évaluation d'intérêts.,system,False
+synth_youth2,PLAN_EXPIRING,MEDIUM,Le plan d'action de Mariem Khelifi expire le 30/06/2026. Prévoir un bilan.,system,False
+synth_youth15,PLAN_EXPIRING,MEDIUM,Le plan d'action de Nizar Hamdi expire le 30/06/2026. Vérifier l'avancement du stage.,system,False
+synth_youth1,MENTOR_RECOMMENDATION,MEDIUM,Recommandation du mentor Karim Trabelsi pour Ahmed Mansouri : Préparer la négociation salariale. Très bon profil.,mentor1@careerpathtn.tn,True
+synth_youth4,MENTOR_RECOMMENDATION,MEDIUM,Recommandation du mentor Karim Trabelsi pour Ines Ferchichi : Continuer les candidatures. Profil très compétitif.,mentor1@careerpathtn.tn,True
+synth_youth6,MENTOR_RECOMMENDATION,LOW,Recommandation du mentor Rania Jebali pour Ines Ferchichi : Très bon profil. Emploi trouvé.,mentor4@careerpathtn.tn,True
+synth_youth10,MENTOR_RECOMMENDATION,MEDIUM,Recommandation du mentor Karim Trabelsi pour Yasmine Zouari : Postuler aux offres front-end React.,mentor1@careerpathtn.tn,False
+synth_youth18,MISSED_SESSIONS,MEDIUM,Olfa Rim a manqué une séance de mentorat. Vérifier la disponibilité.,system,False
+synth_youth3,INACTIVITY,LOW,Youssef Dridi n'a eu aucune activité depuis plus de 30 jours. Relancer le suivi.,system,False
+synth_youth9,INACTIVITY,LOW,Bilel Chtioui n'a eu aucune activité depuis plus de 30 jours.,system,False
+synth_youth21,INACTIVITY,LOW,Rami Tlili n'a eu aucune activité depuis plus de 30 jours.,system,False

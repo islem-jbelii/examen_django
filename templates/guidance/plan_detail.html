@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Plan d'action — CareerPathTN{% endblock %}
+{% block page_title %}Plan d'action{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'guidance:plan-list' %}">Plans d'action</a></li>
+    <li class="breadcrumb-item active">Détail</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-journal-text me-2"></i>Plan d'action</span>
+        <span class="badge {% if plan.status == 'ACTIVE' %}bg-success{% elif plan.status == 'VALIDATED' %}bg-primary{% elif plan.status == 'DRAFT' %}bg-warning text-dark{% elif plan.status == 'COMPLETED' %}bg-info{% else %}bg-secondary{% endif %}">
+          {{ plan.get_status_display }}
+        </span>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Jeune</dt>
+          <dd class="col-sm-8">
+            <a href="{% url 'youth:profile-detail' plan.youth.pk %}">
+              {{ plan.youth.user.get_full_name|default:plan.youth.user.username }}
+            </a>
+          </dd>
+          <dt class="col-sm-4">Créé par</dt>
+          <dd class="col-sm-8">{{ plan.created_by.get_full_name|default:plan.created_by.username }}</dd>
+          <dt class="col-sm-4">Secteur cible</dt>
+          <dd class="col-sm-8">{{ plan.target_sector }}</dd>
+          <dt class="col-sm-4">Parcours cible</dt>
+          <dd class="col-sm-8">{{ plan.target_career|default:"—" }}</dd>
+          <dt class="col-sm-4">Objectifs</dt>
+          <dd class="col-sm-8">{{ plan.objectives }}</dd>
+          <dt class="col-sm-4">Période</dt>
+          <dd class="col-sm-8">{{ plan.start_date|date:"d/m/Y" }} → {{ plan.end_date|date:"d/m/Y" }}</dd>
+          {% if plan.validated_by %}
+          <dt class="col-sm-4">Validé par</dt>
+          <dd class="col-sm-8">{{ plan.validated_by.get_full_name|default:plan.validated_by.username }} le {{ plan.validated_at|date:"d/m/Y H:i" }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    {% if plan.milestones %}
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Jalons</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for milestone in plan.milestones %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              {% if milestone.done %}
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+              {% else %}
+                <i class="bi bi-circle text-muted me-2"></i>
+              {% endif %}
+              {{ milestone.title }}
+            </span>
+            <small class="text-muted">{{ milestone.due_date }}</small>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-2">
+      {% if user.role == 'COUNSELOR' and plan.status == 'DRAFT' %}
+      <a href="{% url 'guidance:plan-validate' plan.pk %}" class="btn btn-success">
+        <i class="bi bi-check-circle"></i> Valider ce plan
+      </a>
+      {% endif %}
+      <a href="{% url 'guidance:plan-list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

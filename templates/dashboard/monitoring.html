@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord de suivi — CareerPathTN{% endblock %}
+{% block page_title %}Tableau de bord de suivi{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  .kpi-card { border-left: 4px solid; }
+  .kpi-card.blue  { border-color: #0d6efd; }
+  .kpi-card.red   { border-color: #dc3545; }
+  .kpi-card.orange{ border-color: #fd7e14; }
+  .kpi-card.yellow{ border-color: #ffc107; }
+  .kpi-card.green { border-color: #198754; }
+  .kpi-card.purple{ border-color: #6f42c1; }
+  .chart-container { position: relative; height: 260px; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item active">Suivi</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filters + Export -->
+<div class="card mb-4">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Gouvernorat</label>
+        <select name="governorate" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in governorate_choices %}
+            <option value="{{ val }}" {% if current_gov == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Secteur</label>
+        <select name="sector" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for s in sectors %}
+            <option value="{{ s.pk }}" {% if current_sector == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Éducation</label>
+        <select name="education_level" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in education_choices %}
+            <option value="{{ val }}" {% if current_edu == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-1">
+        <button type="submit" class="btn btn-sm btn-primary flex-fill">
+          <i class="bi bi-funnel"></i> Filtrer
+        </button>
+        <a href="{% url 'dashboard:monitoring' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+      <div class="col-md-3 d-flex gap-1 justify-content-end">
+        <a href="{% url 'dashboard:export-csv' %}?governorate={{ current_gov }}&sector={{ current_sector }}&education_level={{ current_edu }}"
+           class="btn btn-sm btn-outline-success">
+          <i class="bi bi-filetype-csv"></i> CSV
+        </a>
+        <a href="{% url 'dashboard:export-pdf' %}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-file-pdf"></i> PDF
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-2">
+    <div class="card kpi-card blue h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Jeunes actifs</div>
+        <div class="display-6 fw-bold text-primary">{{ kpis.active_youth }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card kpi-card red h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Alertes HIGH</div>
+        <div class="display-6 fw-bold text-danger">{{ kpis.high_alerts }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card kpi-card orange h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Séances manquées</div>
+        <div class="display-6 fw-bold" style="color:#fd7e14">{{ kpis.missed_sessions_month }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card kpi-card yellow h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Plans expirant</div>
+        <div class="display-6 fw-bold text-warning">{{ kpis.expiring_plans }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card kpi-card green h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Mentors dispo</div>
+        <div class="display-6 fw-bold text-success">{{ kpis.available_mentors }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="card kpi-card purple h-100">
+      <div class="card-body py-3">
+        <div class="text-muted small">Complétés ce mois</div>
+        <div class="display-6 fw-bold" style="color:#6f42c1">{{ kpis.completed_month }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row 1 -->
+<div class="row g-3 mb-4">
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Jeunes par statut</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartStatus"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Top 5 secteurs d'intérêt</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartSectors"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Distribution du score</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartReadiness"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row 2 -->
+<div class="row g-3 mb-4">
+  <div class="col-md-7">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Séances par semaine (8 dernières semaines)</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartWeeks"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Top 10 gouvernorats</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartGov"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerts panel + Audit log -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center fw-semibold small">
+        Alertes non lues (HIGH en premier)
+        <a href="{% url 'alerts:alert-list' %}" class="btn btn-sm btn-outline-secondary">Toutes</a>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for alert in recent_alerts %}
+          <li class="list-group-item py-2">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <span class="badge {% if alert.severity == 'HIGH' %}bg-danger{% elif alert.severity == 'MEDIUM' %}bg-warning text-dark{% else %}bg-secondary{% endif %} me-2">
+                  {{ alert.get_severity_display }}
+                </span>
+                <strong class="small">{{ alert.youth.user.get_full_name|default:alert.youth.user.username }}</strong>
+                <div class="text-muted" style="font-size:.75rem">{{ alert.get_alert_type_display }}</div>
+              </div>
+              <div class="text-end">
+                <div class="text-muted" style="font-size:.7rem">{{ alert.created_at|timesince }} ago</div>
+                <a href="{% url 'alerts:mark-read' alert.pk %}" class="btn btn-sm btn-outline-secondary mt-1" style="font-size:.7rem;padding:1px 6px">
+                  Lu
+                </a>
+              </div>
+            </div>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted text-center py-3">Aucune alerte non lue.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold small">Activité récente (journal d'audit)</div>
+      <div class="card-body p-0">
+        <div class="table-responsive" style="max-height:320px;overflow-y:auto;">
+          <table class="table table-sm mb-0">
+            <thead class="table-light sticky-top">
+              <tr><th>Heure</th><th>Utilisateur</th><th>Action</th><th>Résultat</th></tr>
+            </thead>
+            <tbody>
+              {% for log in audit_logs %}
+              <tr>
+                <td style="font-size:.72rem" class="text-muted">{{ log.timestamp|date:"d/m H:i" }}</td>
+                <td style="font-size:.75rem">{{ log.user.username|default:"system" }}</td>
+                <td><code style="font-size:.72rem">{{ log.action }}</code></td>
+                <td>
+                  <span class="badge {% if log.result == 'SUCCESS' %}bg-success{% else %}bg-danger{% endif %}" style="font-size:.65rem">
+                    {{ log.result }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-2">Aucune activité.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mentor overview -->
+<div class="card">
+  <div class="card-header fw-semibold small">Vue d'ensemble des mentors</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Mentor</th><th>Secteur</th><th>Jeunes</th>
+            <th>Séances ce mois</th><th>Disponibilité</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in mentor_data %}
+          <tr>
+            <td class="fw-semibold small">{{ item.profile.user.get_full_name|default:item.profile.user.username }}</td>
+            <td><span class="badge bg-info text-dark">{{ item.profile.sector }}</span></td>
+            <td>
+              <span class="{% if item.profile.current_youth_count >= item.profile.max_youth_capacity %}text-danger fw-bold{% else %}text-success{% endif %}">
+                {{ item.profile.current_youth_count }}/{{ item.profile.max_youth_capacity }}
+              </span>
+            </td>
+            <td>{{ item.sessions_month }}</td>
+            <td>
+              <span class="badge {% if item.profile.availability == 'AVAILABLE' %}bg-success{% elif item.profile.availability == 'BUSY' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                {{ item.profile.get_availability_display }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-3">Aucun mentor.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const COLORS = ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#0dcaf0','#fd7e14','#20c997','#6c757d','#e63946'];
+
+// 1. Bar: Youth by status
+new Chart(document.getElementById('chartStatus'), {
+  type: 'bar',
+  data: {
+    labels: {{ chart_status_labels|safe }},
+    datasets: [{
+      label: 'Jeunes',
+      data: {{ chart_status_data|safe }},
+      backgroundColor: COLORS,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+
+// 2. Pie: Top sectors
+new Chart(document.getElementById('chartSectors'), {
+  type: 'pie',
+  data: {
+    labels: {{ chart_sector_labels|safe }},
+    datasets: [{
+      data: {{ chart_sector_data|safe }},
+      backgroundColor: COLORS,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+  }
+});
+
+// 3. Doughnut: Readiness distribution
+new Chart(document.getElementById('chartReadiness'), {
+  type: 'doughnut',
+  data: {
+    labels: {{ chart_readiness_labels|safe }},
+    datasets: [{
+      data: {{ chart_readiness_data|safe }},
+      backgroundColor: ['#dc3545','#ffc107','#198754'],
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+  }
+});
+
+// 4. Line: Sessions by week
+new Chart(document.getElementById('chartWeeks'), {
+  type: 'line',
+  data: {
+    labels: {{ chart_weeks_labels|safe }},
+    datasets: [
+      {
+        label: 'Complétées',
+        data: {{ chart_weeks_completed|safe }},
+        borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.1)',
+        tension: 0.3, fill: true,
+      },
+      {
+        label: 'Manquées',
+        data: {{ chart_weeks_missed|safe }},
+        borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,.1)',
+        tension: 0.3, fill: true,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+
+// 5. Horizontal bar: Youth by governorate
+new Chart(document.getElementById('chartGov'), {
+  type: 'bar',
+  data: {
+    labels: {{ chart_gov_labels|safe }},
+    datasets: [{
+      label: 'Jeunes',
+      data: {{ chart_gov_data|safe }},
+      backgroundColor: '#0d6efd',
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+</script>
+{% endblock %}

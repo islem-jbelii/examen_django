@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Assigner un mentor — CareerPathTN{% endblock %}
+{% block page_title %}Assigner un mentor{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:youth-list' %}">Jeunes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:profile-detail' profile.pk %}">{{ profile }}</a></li>
+    <li class="breadcrumb-item active">Assigner un mentor</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-body py-2">
+        <strong>Jeune :</strong> {{ profile.user.get_full_name|default:profile.user.username }}
+        &nbsp;|&nbsp;
+        <strong>Mentor actuel :</strong>
+        {% if profile.assigned_mentor %}
+          <span class="badge bg-success">{{ profile.assigned_mentor.get_full_name|default:profile.assigned_mentor.username }}</span>
+        {% else %}
+          <span class="text-muted">Non assigné</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if assign_error %}
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ assign_error }}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header fw-semibold">Mentors disponibles</div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nom</th>
+                <th>Secteur</th>
+                <th>Entreprise</th>
+                <th>Exp.</th>
+                <th>Capacité</th>
+                <th>Dispo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for mentor in mentors %}
+              <tr class="{% if mentor.current_youth_count >= mentor.max_youth_capacity %}table-secondary{% endif %}">
+                <td>
+                  <strong>{{ mentor.user.get_full_name|default:mentor.user.username }}</strong>
+                  <div class="small text-muted">{{ mentor.bio|truncatechars:60 }}</div>
+                </td>
+                <td><span class="badge bg-info text-dark">{{ mentor.sector }}</span></td>
+                <td class="small">{{ mentor.company_name|default:"—" }}</td>
+                <td class="small">{{ mentor.years_of_experience }} ans</td>
+                <td>
+                  <span class="{% if mentor.current_youth_count >= mentor.max_youth_capacity %}text-danger fw-bold{% else %}text-success{% endif %}">
+                    {{ mentor.current_youth_count }}/{{ mentor.max_youth_capacity }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge {% if mentor.availability == 'AVAILABLE' %}bg-success{% elif mentor.availability == 'BUSY' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ mentor.get_availability_display }}
+                  </span>
+                </td>
+                <td>
+                  {% if mentor.current_youth_count < mentor.max_youth_capacity %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="mentor_id" value="{{ mentor.pk }}">
+                    <button type="submit" class="btn btn-sm btn-success">
+                      <i class="bi bi-check-lg"></i> Assigner
+                    </button>
+                  </form>
+                  {% else %}
+                  <span class="text-muted small">Complet</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-3">Aucun mentor vérifié disponible.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

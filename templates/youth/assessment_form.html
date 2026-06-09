@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Évaluation des intérêts — CareerPathTN{% endblock %}
+{% block page_title %}Évaluation des intérêts{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:youth-list' %}">Jeunes</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:profile-detail' profile.pk %}">{{ profile }}</a></li>
+    <li class="breadcrumb-item active">Évaluation</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-body py-2">
+        <div class="d-flex align-items-center gap-3">
+          <div>
+            <strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong>
+            <span class="text-muted ms-2">{{ profile.age }} ans — {{ profile.get_governorate_display }}</span>
+          </div>
+          <span class="badge badge-{{ profile.status }} ms-auto">{{ profile.get_status_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-clipboard-check me-2"></i>
+        Questionnaire d'intérêts et d'aptitudes ({{ questions|length }} questions)
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% for q in questions %}
+          <div class="mb-4 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+            <p class="fw-semibold mb-2">
+              <span class="badge bg-secondary me-2">{{ forloop.counter }}</span>
+              {{ q.text }}
+            </p>
+            <div class="row g-2">
+              {% for val, label in q.choices %}
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio"
+                         name="{{ q.id }}" id="{{ q.id }}_{{ val }}" value="{{ val }}"
+                         {% if responses|default_if_none:'' %}
+                           {% if responses|dictsort:q.id == val %}checked{% endif %}
+                         {% endif %}
+                         required>
+                  <label class="form-check-label" for="{{ q.id }}_{{ val }}">
+                    <span class="badge bg-light text-dark border me-1">{{ val }}</span> {{ label }}
+                  </label>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle"></i> Soumettre l'évaluation
+            </button>
+            <a href="{% url 'youth:profile-detail' profile.pk %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

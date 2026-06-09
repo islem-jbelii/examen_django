@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Valider le plan — CareerPathTN{% endblock %}
+{% block page_title %}Valider le plan d'action{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header fw-semibold text-success">
+        <i class="bi bi-check-circle me-2"></i>Confirmer la validation
+      </div>
+      <div class="card-body">
+        <p>Vous êtes sur le point de valider le plan d'action de :</p>
+        <p class="fw-bold fs-5">{{ plan.youth.user.get_full_name|default:plan.youth.user.username }}</p>
+        <p class="text-muted">Secteur cible : <strong>{{ plan.target_sector }}</strong></p>
+        <p class="text-muted">Période : {{ plan.start_date|date:"d/m/Y" }} → {{ plan.end_date|date:"d/m/Y" }}</p>
+        <div class="alert alert-info small">
+          <i class="bi bi-info-circle me-1"></i>
+          Une fois validé, le plan passera au statut <strong>Validé</strong> et une alerte sera créée pour le mentor.
+        </div>
+        <form method="post" class="d-flex gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle"></i> Confirmer la validation
+          </button>
+          <a href="{% url 'guidance:plan-detail' plan.pk %}" class="btn btn-outline-secondary">Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

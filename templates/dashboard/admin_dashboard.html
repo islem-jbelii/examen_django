@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord Admin — CareerPathTN{% endblock %}
+{% block page_title %}Tableau de bord Administrateur{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active">Tableau de bord</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small text-white-50">Jeunes inscrits</div>
+            <div class="display-6 fw-bold">{{ total_youth }}</div>
+          </div>
+          <i class="bi bi-people fs-1 opacity-50"></i>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0">
+        <a href="{% url 'youth:youth-list' %}" class="text-white small">Voir tous <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small text-white-50">Plans actifs</div>
+            <div class="display-6 fw-bold">{{ active_plans }}</div>
+          </div>
+          <i class="bi bi-journal-check fs-1 opacity-50"></i>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0">
+        <a href="{% url 'guidance:plan-list' %}" class="text-white small">Voir tous <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small text-white-50">Séances complétées</div>
+            <div class="display-6 fw-bold">{{ completed_sessions }}</div>
+          </div>
+          <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0">
+        <a href="{% url 'mentorship:session-list' %}" class="text-white small">Voir toutes <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small text-white-50">Alertes non lues</div>
+            <div class="display-6 fw-bold">{{ unread_alerts }}</div>
+          </div>
+          <i class="bi bi-bell fs-1 opacity-50"></i>
+        </div>
+      </div>
+      <div class="card-footer bg-transparent border-0">
+        <a href="{% url 'alerts:alert-list' %}" class="text-white small">Voir toutes <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Youth by status -->
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="card-header fw-semibold">Répartition des jeunes par statut</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Statut</th><th class="text-end">Nombre</th></tr>
+          </thead>
+          <tbody>
+            {% for label, count in youth_by_status %}
+            <tr>
+              <td>{{ label }}</td>
+              <td class="text-end"><span class="badge bg-secondary">{{ count }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent alerts -->
+  <div class="col-md-7">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
+        Alertes récentes
+        <a href="{% url 'alerts:alert-list' %}" class="btn btn-sm btn-outline-secondary">Toutes</a>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for alert in recent_alerts %}
+          <li class="list-group-item d-flex justify-content-between align-items-start py-2">
+            <div>
+              <span class="badge {% if alert.severity == 'HIGH' %}bg-danger{% elif alert.severity == 'MEDIUM' %}bg-warning text-dark{% else %}bg-secondary{% endif %} me-2">
+                {{ alert.get_severity_display }}
+              </span>
+              <span class="small">{{ alert.message|truncatechars:70 }}</span>
+            </div>
+            <small class="text-muted ms-2 text-nowrap">{{ alert.created_at|date:"d/m H:i" }}</small>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted text-center py-3">Aucune alerte récente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex gap-2 mt-4">
+  <a href="/admin/" class="btn btn-outline-danger"><i class="bi bi-gear me-1"></i>Django Admin</a>
+  <a href="{% url 'youth:youth-list' %}" class="btn btn-outline-primary"><i class="bi bi-people me-1"></i>Tous les jeunes</a>
+  <a href="{% url 'alerts:alert-list' %}" class="btn btn-outline-warning"><i class="bi bi-bell me-1"></i>Alertes</a>
+  <a href="{% url 'mentorship:session-list' %}" class="btn btn-outline-info"><i class="bi bi-calendar3 me-1"></i>Séances</a>
+</div>
+{% endblock %}

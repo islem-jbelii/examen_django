@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+{% block title %}{{ profile }} — CareerPathTN{% endblock %}
+{% block page_title %}Profil jeune{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    {% if user.role == 'COUNSELOR' or user.role == 'ADMIN' %}
+    <li class="breadcrumb-item"><a href="{% url 'youth:youth-list' %}">Jeunes</a></li>
+    {% endif %}
+    <li class="breadcrumb-item active">{{ profile.user.get_full_name|default:profile.user.username }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- Header card -->
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h4 class="mb-1">{{ profile.user.get_full_name|default:profile.user.username }}</h4>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <span class="badge badge-{{ profile.status }}">{{ profile.get_status_display }}</span>
+          <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt"></i> {{ profile.get_governorate_display }}</span>
+          <span class="badge bg-light text-dark border"><i class="bi bi-mortarboard"></i> {{ profile.get_education_level_display }}</span>
+          <span class="badge bg-light text-dark border"><i class="bi bi-calendar3"></i> {{ profile.age }} ans</span>
+        </div>
+        <div class="text-muted small">
+          Conseiller : <strong>{{ profile.assigned_counselor.get_full_name|default:"Non assigné" }}</strong>
+          &nbsp;|&nbsp;
+          Mentor : <strong>{{ profile.assigned_mentor.get_full_name|default:"Non assigné" }}</strong>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="display-4 fw-bold {% if score >= 70 %}score-high{% elif score >= 40 %}score-mid{% else %}score-low{% endif %}">
+          {{ score }}<small class="fs-5 text-muted">/100</small>
+        </div>
+        <div class="progress mt-1" style="height:10px;border-radius:5px;">
+          <div class="progress-bar {% if score >= 70 %}score-bar-high{% elif score >= 40 %}score-bar-mid{% else %}score-bar-low{% endif %}"
+               style="width:{{ score }}%"></div>
+        </div>
+        <small class="text-muted">Score de préparation</small>
+      </div>
+      <div class="col-md-3 text-end">
+        {% if user.role == 'COUNSELOR' %}
+        <a href="{% url 'youth:youth-update' profile.pk %}" class="btn btn-sm btn-outline-primary mb-1">
+          <i class="bi bi-pencil"></i> Modifier
+        </a><br>
+        <a href="{% url 'youth:assessment' profile.pk %}" class="btn btn-sm btn-outline-success mb-1">
+          <i class="bi bi-clipboard-check"></i> Évaluation
+        </a><br>
+        <a href="{% url 'mentorship:mentor-assign' profile.pk %}" class="btn btn-sm btn-outline-info mb-1">
+          <i class="bi bi-award"></i> Assigner mentor
+        </a><br>
+        <a href="{% url 'guidance:plan-create' %}?youth={{ profile.pk }}" class="btn btn-sm btn-outline-warning">
+          <i class="bi bi-journal-plus"></i> Nouveau plan
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-3" id="profileTabs">
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'profile' %}active{% endif %}" href="?tab=profile">
+      <i class="bi bi-person"></i> Profil
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'assessment' %}active{% endif %}" href="?tab=assessment">
+      <i class="bi bi-clipboard-check"></i> Évaluation
+      <span class="badge bg-secondary ms-1">{{ assessments|length }}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'plans' %}active{% endif %}" href="?tab=plans">
+      <i class="bi bi-journal-text"></i> Plans d'action
+      <span class="badge bg-secondary ms-1">{{ plans|length }}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'sessions' %}active{% endif %}" href="?tab=sessions">
+      <i class="bi bi-calendar3"></i> Séances
+      <span class="badge bg-secondary ms-1">{{ sessions|length }}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'alerts' %}active{% endif %}" href="?tab=alerts">
+      <i class="bi bi-bell"></i> Alertes
+      {% with unread=alerts|length %}{% if unread %}<span class="badge bg-danger ms-1">{{ unread }}</span>{% endif %}{% endwith %}
+    </a>
+  </li>
+  {% if user.role == 'COUNSELOR' or user.role == 'ADMIN' %}
+  <li class="nav-item">
+    <a class="nav-link {% if active_tab == 'audit' %}active{% endif %}" href="?tab=audit">
+      <i class="bi bi-journal-code"></i> Journal
+    </a>
+  </li>
+  {% endif %}
+</ul>
+
+<!-- Tab content -->
+<div class="tab-content">
+
+  <!-- PROFILE TAB -->
+  {% if active_tab == 'profile' %}
+  <div class="row g-3">
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header fw-semibold">Informations personnelles</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-5">Nom complet</dt>
+            <dd class="col-sm-7">{{ profile.user.get_full_name|default:"—" }}</dd>
+            <dt class="col-sm-5">Email</dt>
+            <dd class="col-sm-7">{{ profile.user.email|default:"—" }}</dd>
+            <dt class="col-sm-5">Date de naissance</dt>
+            <dd class="col-sm-7">{{ profile.date_of_birth|date:"d/m/Y" }} ({{ profile.age }} ans)</dd>
+            <dt class="col-sm-5">Genre</dt>
+            <dd class="col-sm-7">{{ profile.get_gender_display }}</dd>
+            <dt class="col-sm-5">Gouvernorat</dt>
+            <dd class="col-sm-7">{{ profile.get_governorate_display }}</dd>
+            <dt class="col-sm-5">Niveau d'éducation</dt>
+            <dd class="col-sm-7">{{ profile.get_education_level_display }}</dd>
+            <dt class="col-sm-5">Institution</dt>
+            <dd class="col-sm-7">{{ profile.current_school_or_institution|default:"—" }}</dd>
+            <dt class="col-sm-5">Secteurs d'intérêt</dt>
+            <dd class="col-sm-7">
+              {% for s in profile.interests.all %}
+                <span class="badge bg-info text-dark">{{ s.name }}</span>
+              {% empty %}—{% endfor %}
+            </dd>
+            {% if profile.notes %}
+            <dt class="col-sm-5">Notes</dt>
+            <dd class="col-sm-7">{{ profile.notes }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card">
+        <div class="card-header fw-semibold">Détail du score de préparation</div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            {% if score_breakdown.assessment_completed %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-check-circle-fill text-success me-2"></i>Évaluation complétée</span>
+              <span class="fw-bold text-success">+{{ score_breakdown.assessment_completed }}</span>
+            </li>
+            {% endif %}
+            {% if score_breakdown.active_action_plan %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-check-circle-fill text-success me-2"></i>Plan d'action actif</span>
+              <span class="fw-bold text-success">+{{ score_breakdown.active_action_plan }}</span>
+            </li>
+            {% endif %}
+            {% if score_breakdown.interest_sectors %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-check-circle-fill text-success me-2"></i>Secteurs d'intérêt</span>
+              <span class="fw-bold text-success">+{{ score_breakdown.interest_sectors }}</span>
+            </li>
+            {% endif %}
+            {% if score_breakdown.education_level %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-check-circle-fill text-success me-2"></i>Niveau d'éducation (Bac+)</span>
+              <span class="fw-bold text-success">+{{ score_breakdown.education_level }}</span>
+            </li>
+            {% endif %}
+            {% if score_breakdown.mentor_with_session %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-check-circle-fill text-success me-2"></i>Mentor + séance complétée</span>
+              <span class="fw-bold text-success">+{{ score_breakdown.mentor_with_session }}</span>
+            </li>
+            {% endif %}
+            {% if score_breakdown.inactive_penalty %}
+            <li class="d-flex justify-content-between py-1 border-bottom">
+              <span><i class="bi bi-x-circle-fill text-danger me-2"></i>Pénalité inactivité</span>
+              <span class="fw-bold text-danger">{{ score_breakdown.inactive_penalty }}</span>
+            </li>
+            {% endif %}
+            <li class="d-flex justify-content-between pt-2 fw-bold">
+              <span>Total</span>
+              <span class="{% if score >= 70 %}score-high{% elif score >= 40 %}score-mid{% else %}score-low{% endif %}">{{ score }}/100</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ASSESSMENT TAB -->
+  {% if active_tab == 'assessment' %}
+  <div class="d-flex justify-content-between mb-3">
+    <h5>Évaluations des intérêts</h5>
+    {% if user.role == 'COUNSELOR' %}
+    <a href="{% url 'youth:assessment' profile.pk %}" class="btn btn-sm btn-success">
+      <i class="bi bi-clipboard-plus"></i> Nouvelle évaluation
+    </a>
+    {% endif %}
+  </div>
+  {% for assessment in assessments %}
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between">
+      <span><i class="bi bi-clipboard-check me-2"></i>{{ assessment.assessment_date|date:"d/m/Y" }}</span>
+      <span class="badge {% if assessment.status == 'COMPLETED' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+        {{ assessment.get_status_display }}
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="mb-2"><strong>Conduit par :</strong> {{ assessment.conducted_by.get_full_name|default:assessment.conducted_by.username }}</p>
+      <p class="mb-2"><strong>Secteurs recommandés :</strong>
+        {% for s in assessment.recommended_sectors.all %}
+          <span class="badge bg-info text-dark">{{ s.name }}</span>
+        {% empty %}—{% endfor %}
+      </p>
+      {% if assessment.score_breakdown %}
+      <details>
+        <summary class="text-muted small">Détail des scores</summary>
+        <ul class="list-unstyled mt-2 small">
+          {% for sector, pts in assessment.score_breakdown.items %}
+          <li>{{ sector }} : <strong>{{ pts }}</strong> pts</li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="alert alert-info">Aucune évaluation effectuée.</div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- PLANS TAB -->
+  {% if active_tab == 'plans' %}
+  <div class="d-flex justify-content-between mb-3">
+    <h5>Plans d'action</h5>
+    {% if user.role == 'COUNSELOR' %}
+    <a href="{% url 'guidance:plan-create' %}?youth={{ profile.pk }}" class="btn btn-sm btn-warning">
+      <i class="bi bi-journal-plus"></i> Nouveau plan
+    </a>
+    {% endif %}
+  </div>
+  {% for plan in plans %}
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between">
+      <span><i class="bi bi-journal-text me-2"></i>{{ plan.target_sector }}</span>
+      <span class="badge {% if plan.status == 'ACTIVE' %}bg-success{% elif plan.status == 'VALIDATED' %}bg-primary{% elif plan.status == 'DRAFT' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+        {{ plan.get_status_display }}
+      </span>
+    </div>
+    <div class="card-body">
+      <p class="mb-1"><strong>Objectifs :</strong> {{ plan.objectives|truncatechars:150 }}</p>
+      <p class="mb-1 small text-muted">{{ plan.start_date|date:"d/m/Y" }} → {{ plan.end_date|date:"d/m/Y" }}</p>
+      <div class="d-flex gap-2 mt-2">
+        <a href="{% url 'guidance:plan-detail' plan.pk %}" class="btn btn-sm btn-outline-primary">Voir</a>
+        {% if user.role == 'COUNSELOR' and plan.status == 'DRAFT' %}
+        <a href="{% url 'guidance:plan-validate' plan.pk %}" class="btn btn-sm btn-outline-success">Valider</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="alert alert-info">Aucun plan d'action.</div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- SESSIONS TAB -->
+  {% if active_tab == 'sessions' %}
+  <h5 class="mb-3">Séances de mentorat</h5>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr><th>Date</th><th>Type</th><th>Mentor</th><th>Statut</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        {% for session in sessions %}
+        <tr>
+          <td>{{ session.session_date|date:"d/m/Y" }}</td>
+          <td>{{ session.get_session_type_display }}</td>
+          <td>{{ session.mentor.get_full_name|default:session.mentor.username }}</td>
+          <td>
+            <span class="badge badge-{{ session.status }}">{{ session.get_status_display }}</span>
+          </td>
+          <td class="small text-muted">{{ session.notes|truncatechars:60|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Aucune séance.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- ALERTS TAB -->
+  {% if active_tab == 'alerts' %}
+  <h5 class="mb-3">Alertes</h5>
+  {% for alert in alerts %}
+  <div class="alert alert-{% if alert.severity == 'HIGH' %}danger{% elif alert.severity == 'MEDIUM' %}warning{% else %}secondary{% endif %} d-flex justify-content-between align-items-start">
+    <div>
+      <strong>{{ alert.get_alert_type_display }}</strong><br>
+      <span class="small">{{ alert.message }}</span>
+    </div>
+    <div class="text-end">
+      <small class="text-muted d-block">{{ alert.created_at|date:"d/m/Y H:i" }}</small>
+      {% if not alert.is_read and user.role in 'COUNSELOR ADMIN' %}
+      <a href="{% url 'alerts:mark-read' alert.pk %}" class="btn btn-sm btn-outline-secondary mt-1">Marquer lu</a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="alert alert-info">Aucune alerte.</div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- AUDIT TAB -->
+  {% if active_tab == 'audit' and user.role in 'COUNSELOR ADMIN' %}
+  <h5 class="mb-3">Journal d'audit</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover">
+      <thead class="table-light">
+        <tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Résultat</th><th>Raison</th></tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+        <tr>
+          <td class="small">{{ log.timestamp|date:"d/m/Y H:i" }}</td>
+          <td class="small">{{ log.user.username|default:"system" }}</td>
+          <td><code class="small">{{ log.action }}</code></td>
+          <td>
+            <span class="badge {% if log.result == 'SUCCESS' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ log.result }}
+            </span>
+          </td>
+          <td class="small text-muted">{{ log.reason|truncatechars:80|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted">Aucune entrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

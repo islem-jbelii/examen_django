@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Résultat de l'import — CareerPathTN{% endblock %}
+{% block page_title %}Résultat de l'import CSV{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-check-circle-fill text-success display-4 mb-3"></i>
+        <h4>Import terminé</h4>
+        <div class="row g-3 mt-2">
+          <div class="col-6">
+            <div class="card bg-success text-white">
+              <div class="card-body py-3">
+                <div class="display-5 fw-bold">{{ result.imported }}</div>
+                <div class="small">profils importés</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card {% if result.error_count %}bg-danger{% else %}bg-secondary{% endif %} text-white">
+              <div class="card-body py-3">
+                <div class="display-5 fw-bold">{{ result.error_count }}</div>
+                <div class="small">lignes ignorées</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if result.error_count %}
+        <div class="mt-4">
+          <p class="text-muted">Des erreurs ont été détectées. Téléchargez le rapport pour les corriger.</p>
+          <a href="?download=errors" class="btn btn-outline-danger">
+            <i class="bi bi-download"></i> Télécharger le rapport d'erreurs (CSV)
+          </a>
+        </div>
+        {% endif %}
+
+        <div class="d-flex gap-2 justify-content-center mt-4">
+          <a href="{% url 'youth:youth-list' %}" class="btn btn-primary">
+            <i class="bi bi-people"></i> Voir les jeunes
+          </a>
+          <a href="{% url 'youth:bulk-import' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-upload"></i> Nouvel import
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

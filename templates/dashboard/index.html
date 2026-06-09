@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — CareerPathTN{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+  <i class="bi bi-compass display-1 text-danger"></i>
+  <h2 class="mt-3">Bienvenue sur CareerPathTN</h2>
+  <p class="text-muted">Plateforme d'orientation professionnelle pour la jeunesse tunisienne</p>
+  <a href="{% url 'dashboard:redirect' %}" class="btn btn-danger mt-2">
+    <i class="bi bi-speedometer2"></i> Accéder à mon tableau de bord
+  </a>
+</div>
+{% endblock %}

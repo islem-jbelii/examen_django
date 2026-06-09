@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Import CSV — CareerPathTN{% endblock %}
+{% block page_title %}Import CSV de jeunes{% endblock %}
+{% block nav_bulk_import %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:youth-list' %}">Jeunes</a></li>
+    <li class="breadcrumb-item active">Import CSV</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-upload me-2"></i>Importer des profils depuis un fichier CSV
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ form.csv_file.label }}</label>
+            {{ form.csv_file }}
+            <div class="form-text">{{ form.csv_file.help_text }}</div>
+            {% if form.csv_file.errors %}
+            <div class="text-danger small mt-1">{{ form.csv_file.errors.0 }}</div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-upload"></i> Importer
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header fw-semibold">Format attendu</div>
+      <div class="card-body">
+        <p class="small text-muted mb-2">Colonnes requises (en-tête exact) :</p>
+        <table class="table table-sm table-bordered small">
+          <thead class="table-light">
+            <tr><th>Colonne</th><th>Format</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>first_name</td><td>Texte</td></tr>
+            <tr><td>last_name</td><td>Texte</td></tr>
+            <tr><td>date_of_birth</td><td>YYYY-MM-DD</td></tr>
+            <tr><td>gender</td><td>M ou F</td></tr>
+            <tr><td>governorate</td><td>Code (ex: TUNIS, SFAX…)</td></tr>
+            <tr><td>education_level</td><td>BAC, LICENCE, MASTER…</td></tr>
+            <tr><td>interests</td><td>Noms séparés par virgules</td></tr>
+          </tbody>
+        </table>
+        <a href="/static/samples/malformed_youth.csv" class="btn btn-sm btn-outline-secondary" download>
+          <i class="bi bi-download"></i> Télécharger exemple CSV
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

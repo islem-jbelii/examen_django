@@ -1,0 +1,314 @@
+[
+  {
+    "model": "careers.careersector",
+    "pk": 1,
+    "fields": {
+      "name": "Informatique",
+      "description": "Développement logiciel, cybersécurité, intelligence artificielle, réseaux et systèmes.",
+      "demand_level": "HIGH",
+      "average_salary_range": "1200 - 3500 TND/mois",
+      "required_education_level": "Licence ou Bac+2",
+      "relevance_weight": 3
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 2,
+    "fields": {
+      "name": "Santé",
+      "description": "Médecine, soins infirmiers, pharmacie, kinésithérapie et professions paramédicales.",
+      "demand_level": "HIGH",
+      "average_salary_range": "1000 - 4000 TND/mois",
+      "required_education_level": "Licence ou Master",
+      "relevance_weight": 3
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 3,
+    "fields": {
+      "name": "Agriculture",
+      "description": "Agriculture moderne, agro-alimentaire, irrigation et développement rural.",
+      "demand_level": "MEDIUM",
+      "average_salary_range": "700 - 1800 TND/mois",
+      "required_education_level": "Bac ou Bac+2",
+      "relevance_weight": 2
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 4,
+    "fields": {
+      "name": "Commerce",
+      "description": "Commerce, vente, marketing, import-export et entrepreneuriat.",
+      "demand_level": "MEDIUM",
+      "average_salary_range": "800 - 2500 TND/mois",
+      "required_education_level": "Bac ou Licence",
+      "relevance_weight": 2
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 5,
+    "fields": {
+      "name": "Artisanat",
+      "description": "Artisanat traditionnel tunisien, poterie, tissage, bijouterie et métiers manuels.",
+      "demand_level": "LOW",
+      "average_salary_range": "500 - 1500 TND/mois",
+      "required_education_level": "Formation professionnelle",
+      "relevance_weight": 1
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 6,
+    "fields": {
+      "name": "Tourisme",
+      "description": "Hôtellerie, restauration, guides touristiques et gestion d'événements.",
+      "demand_level": "MEDIUM",
+      "average_salary_range": "700 - 2000 TND/mois",
+      "required_education_level": "Bac ou Bac+2",
+      "relevance_weight": 2
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 7,
+    "fields": {
+      "name": "Ingénierie",
+      "description": "Génie civil, mécanique, électrique, industriel et environnemental.",
+      "demand_level": "HIGH",
+      "average_salary_range": "1500 - 4500 TND/mois",
+      "required_education_level": "Licence ou Master",
+      "relevance_weight": 3
+    }
+  },
+  {
+    "model": "careers.careersector",
+    "pk": 8,
+    "fields": {
+      "name": "Éducation",
+      "description": "Enseignement, formation professionnelle, éducation spécialisée et animation.",
+      "demand_level": "MEDIUM",
+      "average_salary_range": "900 - 2200 TND/mois",
+      "required_education_level": "Licence",
+      "relevance_weight": 2
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111101",
+    "fields": {
+      "sector": 1,
+      "title": "Développeur Web",
+      "description": "Conception et développement d'applications web front-end et back-end.",
+      "required_skills": "HTML, CSS, JavaScript, Python ou PHP, bases de données SQL",
+      "training_duration_months": 18,
+      "is_active": true
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111102",
+    "fields": {
+      "sector": 1,
+      "title": "Technicien Réseaux",
+      "description": "Installation, configuration et maintenance des infrastructures réseau.",
+      "required_skills": "Cisco, TCP/IP, Linux, sécurité réseau",
+      "training_duration_months": 12,
+      "is_active": true
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111103",
+    "fields": {
+      "sector": 2,
+      "title": "Infirmier(ère)",
+      "description": "Soins aux patients, assistance médicale et suivi thérapeutique.",
+      "required_skills": "Soins infirmiers, pharmacologie de base, communication patient",
+      "training_duration_months": 36,
+      "is_active": true
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111104",
+    "fields": {
+      "sector": 4,
+      "title": "Comptable",
+      "description": "Gestion comptable, fiscalité et reporting financier pour entreprises.",
+      "required_skills": "Comptabilité générale, fiscalité tunisienne, Excel, logiciels comptables",
+      "training_duration_months": 24,
+      "is_active": true
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111105",
+    "fields": {
+      "sector": 7,
+      "title": "Ingénieur Civil",
+      "description": "Conception et supervision de projets de construction et d'infrastructure.",
+      "required_skills": "Calcul de structures, AutoCAD, gestion de projet, normes de construction",
+      "training_duration_months": 60,
+      "is_active": true
+    }
+  },
+  {
+    "model": "careers.careerpath",
+    "pk": "11111111-1111-1111-1111-111111111106",
+    "fields": {
+      "sector": 6,
+      "title": "Guide Touristique",
+      "description": "Accompagnement de groupes touristiques et valorisation du patrimoine tunisien.",
+      "required_skills": "Langues étrangères, histoire et culture tunisienne, communication",
+      "training_duration_months": 12,
+      "is_active": true
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$admin123hashed",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "CareerPathTN",
+      "email": "admin@careerpathtn.tn",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2024-01-01T00:00:00Z",
+      "role": "ADMIN",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$counsel123hashed",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "counselor",
+      "first_name": "Sonia",
+      "last_name": "Ben Ali",
+      "email": "counselor@careerpathtn.tn",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-02T00:00:00Z",
+      "role": "COUNSELOR",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$mentor123hashed",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "mentor1",
+      "first_name": "Karim",
+      "last_name": "Trabelsi",
+      "email": "mentor1@careerpathtn.tn",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-03T00:00:00Z",
+      "role": "MENTOR",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$mentor234hashed",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "mentor2",
+      "first_name": "Fatma",
+      "last_name": "Chaabane",
+      "email": "mentor2@careerpathtn.tn",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-04T00:00:00Z",
+      "role": "MENTOR",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$youth123hashed",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "youth1",
+      "first_name": "Ahmed",
+      "last_name": "Mansouri",
+      "email": "youth1@careerpathtn.tn",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-05T00:00:00Z",
+      "role": "YOUTH",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 6,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$careerpathtn$youth234hashed",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "youth2",
+      "first_name": "Mariem",
+      "last_name": "Khelifi",
+      "email": "youth2@careerpathtn.tn",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2024-01-06T00:00:00Z",
+      "role": "YOUTH",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "mentorship.mentorprofile",
+    "pk": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "fields": {
+      "user": 3,
+      "sector": 1,
+      "company_name": "TechTunisia SARL",
+      "years_of_experience": 8,
+      "bio": "Développeur senior spécialisé en applications web et mobile. Passionné par le mentorat des jeunes talents tunisiens.",
+      "availability": "AVAILABLE",
+      "max_youth_capacity": 3,
+      "current_youth_count": 0,
+      "is_verified": true
+    }
+  },
+  {
+    "model": "mentorship.mentorprofile",
+    "pk": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "fields": {
+      "user": 4,
+      "sector": 2,
+      "company_name": "Clinique El Amal",
+      "years_of_experience": 12,
+      "bio": "Infirmière cheffe avec 12 ans d'expérience en soins intensifs. Engagée dans la formation des futurs professionnels de santé.",
+      "availability": "AVAILABLE",
+      "max_youth_capacity": 2,
+      "current_youth_count": 0,
+      "is_verified": true
+    }
+  }
+]

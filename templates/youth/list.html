@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Jeunes — CareerPathTN{% endblock %}
+{% block page_title %}Liste des jeunes{% endblock %}
+{% block nav_youth_list %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item active">Jeunes</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-people me-2"></i>Jeunes</h4>
+  {% if user.role == 'COUNSELOR' %}
+  <div class="d-flex gap-2">
+    <a href="{% url 'youth:youth-create' %}" class="btn btn-sm btn-danger">
+      <i class="bi bi-person-plus"></i> Nouveau profil
+    </a>
+    <a href="{% url 'youth:bulk-import' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-upload"></i> Import CSV
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Statut</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if current_filters.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Gouvernorat</label>
+        <select name="governorate" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in governorate_choices %}
+            <option value="{{ val }}" {% if current_filters.governorate == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Secteur</label>
+        <select name="sector" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for sector in sectors %}
+            <option value="{{ sector.pk }}" {% if current_filters.sector == sector.pk|stringformat:"s" %}selected{% endif %}>{{ sector.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Éducation</label>
+        <select name="education_level" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in education_choices %}
+            <option value="{{ val }}" {% if current_filters.education_level == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1">Tri</label>
+        <select name="sort" class="form-select form-select-sm">
+          <option value="-readiness_score" {% if current_filters.sort == '-readiness_score' %}selected{% endif %}>Score ↓</option>
+          <option value="readiness_score" {% if current_filters.sort == 'readiness_score' %}selected{% endif %}>Score ↑</option>
+          <option value="user__last_name" {% if current_filters.sort == 'user__last_name' %}selected{% endif %}>Nom A→Z</option>
+          <option value="-created_at" {% if current_filters.sort == '-created_at' %}selected{% endif %}>Plus récent</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-1">
+        <button type="submit" class="btn btn-sm btn-primary flex-fill">
+          <i class="bi bi-funnel"></i> Filtrer
+        </button>
+        <a href="{% url 'youth:youth-list' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nom</th>
+            <th>Âge</th>
+            <th>Gouvernorat</th>
+            <th>Éducation</th>
+            <th>Statut</th>
+            <th>Score</th>
+            <th>Mentor</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+          <tr>
+            <td>
+              <a href="{% url 'youth:profile-detail' profile.pk %}" class="fw-semibold text-decoration-none">
+                {{ profile.user.get_full_name|default:profile.user.username }}
+              </a>
+            </td>
+            <td>{{ profile.age }}</td>
+            <td>{{ profile.get_governorate_display }}</td>
+            <td><span class="badge bg-light text-dark border">{{ profile.get_education_level_display }}</span></td>
+            <td>
+              <span class="badge badge-{{ profile.status }}">{{ profile.get_status_display }}</span>
+            </td>
+            <td>
+              {% with score=profile.readiness_score|default:0 %}
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:8px;min-width:60px;">
+                  <div class="progress-bar
+                    {% if score >= 70 %}score-bar-high{% elif score >= 40 %}score-bar-mid{% else %}score-bar-low{% endif %}"
+                    style="width:{{ score }}%"></div>
+                </div>
+                <span class="fw-semibold
+                  {% if score >= 70 %}score-high{% elif score >= 40 %}score-mid{% else %}score-low{% endif %}"
+                  style="min-width:28px">{{ score }}</span>
+              </div>
+              {% endwith %}
+            </td>
+            <td>
+              {% if profile.assigned_mentor %}
+                <span class="badge bg-success">{{ profile.assigned_mentor.get_full_name|default:profile.assigned_mentor.username }}</span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'youth:profile-detail' profile.pk %}" class="btn btn-outline-primary" title="Voir">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if user.role == 'COUNSELOR' %}
+                <a href="{% url 'youth:youth-update' profile.pk %}" class="btn btn-outline-secondary" title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{% url 'mentorship:mentor-assign' profile.pk %}" class="btn btn-outline-success" title="Assigner mentor">
+                  <i class="bi bi-award"></i>
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">
+              <i class="bi bi-inbox display-6 d-block mb-2"></i>
+              Aucun profil trouvé.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if profiles.paginator %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <small class="text-muted">{{ profiles.paginator.count }} résultat(s)</small>
+    {% include "partials/pagination.html" with page_obj=profiles %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

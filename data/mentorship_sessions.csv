@@ -1,0 +1,32 @@
+youth_username,mentor_username,session_date,session_type,status,notes,recommendations,counselor_notified
+synth_youth1,synth_mentor1,2025-09-20,DISCOVERY,COMPLETED,Première séance de découverte. Ahmed est très motivé et a de bonnes bases en HTML/CSS.,Continuer avec JavaScript et React. Prévoir un projet personnel.,True
+synth_youth1,synth_mentor1,2025-10-05,SKILLS_REVIEW,COMPLETED,Revue des compétences JavaScript. Bonne progression.,Commencer React dès la semaine prochaine.,True
+synth_youth1,synth_mentor1,2025-10-25,CV_REVIEW,COMPLETED,Révision du CV. Ajout des projets personnels et des certifications.,Postuler à 3 startups avant fin novembre.,True
+synth_youth1,synth_mentor1,2025-11-15,MOCK_INTERVIEW,COMPLETED,Simulation d'entretien technique. Ahmed a bien géré les questions algorithmiques.,Travailler les questions comportementales.,True
+synth_youth1,synth_mentor1,2025-12-10,FOLLOW_UP,COMPLETED,Suivi post-entretiens. 2 réponses positives reçues.,Préparer la négociation salariale.,True
+synth_youth4,synth_mentor1,2025-08-28,DISCOVERY,COMPLETED,Ines a un excellent niveau en Java. Objectif certification Java SE.,Commencer la préparation Oracle Java SE 11.,True
+synth_youth4,synth_mentor1,2025-09-15,SKILLS_REVIEW,COMPLETED,Revue des compétences Spring Boot. Très bonne maîtrise.,Démarrer un projet Spring Boot + React.,True
+synth_youth4,synth_mentor1,2025-10-10,CV_REVIEW,COMPLETED,CV professionnel rédigé. Profil LinkedIn optimisé.,Candidater aux offres de développeur Java senior.,True
+synth_youth4,synth_mentor1,2025-11-05,MOCK_INTERVIEW,MISSED,Ines n'a pas pu se connecter. Problème technique.,Reprogrammer la séance.,False
+synth_youth4,synth_mentor1,2025-11-20,MOCK_INTERVIEW,COMPLETED,Simulation d'entretien réussie. Très bonne performance.,Continuer les candidatures.,True
+synth_youth10,synth_mentor1,2025-10-02,DISCOVERY,COMPLETED,Yasmine veut se spécialiser en front-end React. Bon niveau CSS.,Commencer par un projet portfolio.,True
+synth_youth10,synth_mentor1,2025-10-20,SKILLS_REVIEW,COMPLETED,Revue du portfolio. 3 projets React présentés. Très bon niveau.,Ajouter TypeScript au portfolio.,True
+synth_youth10,synth_mentor1,2025-11-10,CV_REVIEW,MISSED,Yasmine n'était pas disponible. Séance annulée.,Reprogrammer.,False
+synth_youth10,synth_mentor1,2025-12-01,CV_REVIEW,COMPLETED,CV révisé. Profil GitHub mis à jour.,Postuler aux offres front-end.,True
+synth_youth2,synth_mentor2,2025-10-12,DISCOVERY,COMPLETED,Mariem est très motivée pour les soins infirmiers. Bonne connaissance de la biologie.,Préparer le concours d'entrée en soins infirmiers.,True
+synth_youth2,synth_mentor2,2025-11-02,SKILLS_REVIEW,COMPLETED,Revue des connaissances médicales de base. Bon niveau.,Travailler les cas cliniques.,True
+synth_youth2,synth_mentor2,2025-11-25,FOLLOW_UP,COMPLETED,Suivi préparation concours. Mariem progresse bien.,Continuer les révisions intensives.,True
+synth_youth12,synth_mentor2,2025-11-20,DISCOVERY,COMPLETED,Salma est déterminée à intégrer l'école de soins infirmiers.,Préparer le dossier d'inscription.,True
+synth_youth12,synth_mentor2,2025-12-08,SKILLS_REVIEW,COMPLETED,Revue des prérequis biologiques. Bon niveau général.,Travailler les mathématiques appliquées à la santé.,True
+synth_youth18,synth_mentor2,2025-10-18,DISCOVERY,COMPLETED,Olfa veut se spécialiser en pédiatrie. Expérience en soins généraux.,Identifier les formations spécialisées disponibles.,True
+synth_youth18,synth_mentor2,2025-11-08,SKILLS_REVIEW,COMPLETED,Revue des compétences en soins pédiatriques. Bon potentiel.,Candidater aux hôpitaux pédiatriques.,True
+synth_youth18,synth_mentor2,2025-12-05,FOLLOW_UP,MISSED,Olfa avait un empêchement professionnel.,Reprogrammer la séance de suivi.,False
+synth_youth6,synth_mentor4,2024-06-25,DISCOVERY,COMPLETED,Ines a un excellent niveau en génie civil. Mémoire en cours.,Finaliser le mémoire et préparer la soutenance.,True
+synth_youth6,synth_mentor4,2024-08-10,CV_REVIEW,COMPLETED,CV professionnel rédigé. Profil LinkedIn créé.,Candidater aux bureaux d'études.,True
+synth_youth6,synth_mentor4,2024-10-05,MOCK_INTERVIEW,COMPLETED,Simulation d'entretien technique réussie.,Continuer les candidatures. Très bon profil.,True
+synth_youth15,synth_mentor4,2025-10-10,DISCOVERY,COMPLETED,Nizar cherche un stage en génie mécanique. Bon niveau académique.,Identifier les entreprises cibles pour le stage.,True
+synth_youth15,synth_mentor4,2025-11-01,CV_REVIEW,COMPLETED,CV révisé. Lettre de motivation rédigée.,Envoyer les candidatures cette semaine.,True
+synth_youth15,synth_mentor4,2025-11-22,FOLLOW_UP,COMPLETED,3 réponses positives reçues. Entretiens planifiés.,Préparer les entretiens techniques.,True
+synth_youth20,synth_mentor1,2024-03-20,DISCOVERY,COMPLETED,Slim a un excellent niveau en IA. Mémoire master en cours.,Finaliser le mémoire et préparer la soutenance.,True
+synth_youth20,synth_mentor1,2024-05-15,CV_REVIEW,COMPLETED,CV très complet. Profil GitHub impressionnant.,Candidater aux startups IA tunisiennes et internationales.,True
+synth_youth20,synth_mentor1,2024-07-10,MOCK_INTERVIEW,COMPLETED,Simulation d'entretien technique IA réussie. Excellent niveau.,Continuer les candidatures. Profil très compétitif.,True

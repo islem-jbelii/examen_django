@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} — CareerPathTN{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'youth:youth-list' %}">Jeunes</a></li>
+    {% if profile %}<li class="breadcrumb-item"><a href="{% url 'youth:profile-detail' profile.pk %}">{{ profile }}</a></li>{% endif %}
+    <li class="breadcrumb-item active">{{ form_title }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header fw-semibold">{{ form_title }}</div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- User field (create only) -->
+          {% if not is_update %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ form.user.label }}</label>
+            {{ form.user }}
+            {% if form.user.errors %}<div class="text-danger small mt-1">{{ form.user.errors.0 }}</div>{% endif %}
+          </div>
+          {% endif %}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.date_of_birth.label }}</label>
+              {{ form.date_of_birth }}
+              {% if form.date_of_birth.errors %}<div class="text-danger small mt-1">{{ form.date_of_birth.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">{{ form.gender.label }}</label>
+              {{ form.gender }}
+              {% if form.gender.errors %}<div class="text-danger small mt-1">{{ form.gender.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">{{ form.governorate.label }}</label>
+              {{ form.governorate }}
+              {% if form.governorate.errors %}<div class="text-danger small mt-1">{{ form.governorate.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.education_level.label }}</label>
+              {{ form.education_level }}
+              {% if form.education_level.errors %}<div class="text-danger small mt-1">{{ form.education_level.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.current_school_or_institution.label }}</label>
+              {{ form.current_school_or_institution }}
+              {% if form.current_school_or_institution.errors %}<div class="text-danger small mt-1">{{ form.current_school_or_institution.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <!-- Interests checkboxes -->
+          <div class="mb-3 mt-3">
+            <label class="form-label fw-semibold">{{ form.interests.label }} <span class="text-danger">*</span></label>
+            {% if form.interests.errors %}
+            <div class="text-danger small mb-1">{{ form.interests.errors.0 }}</div>
+            {% endif %}
+            <div class="row g-2">
+              {% for checkbox in form.interests %}
+              <div class="col-md-4">
+                <div class="form-check">
+                  {{ checkbox.tag }}
+                  <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                    {{ checkbox.choice_label }}
+                  </label>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ form.notes.label }}</label>
+            {{ form.notes }}
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-check-lg"></i> {{ submit_label }}
+            </button>
+            {% if profile %}
+            <a href="{% url 'youth:profile-detail' profile.pk %}" class="btn btn-outline-secondary">Annuler</a>
+            {% else %}
+            <a href="{% url 'youth:youth-list' %}" class="btn btn-outline-secondary">Annuler</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status transitions (update only) -->
+  {% if is_update and profile %}
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header fw-semibold">
+        <i class="bi bi-arrow-right-circle me-2"></i>Transitions de statut
+      </div>
+      <div class="card-body">
+        <p class="small text-muted mb-3">
+          Statut actuel : <span class="badge badge-{{ profile.status }}">{{ profile.get_status_display }}</span>
+        </p>
+
+        {% if transition_error %}
+        <div class="alert alert-danger py-2 small">
+          <i class="bi bi-exclamation-triangle me-1"></i>{{ transition_error }}
+        </div>
+        {% endif %}
+
+        {% for key, label, btn_class in transitions %}
+        <form method="post" class="mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="transition" value="{{ key }}">
+          <button type="submit" class="btn btn-sm {{ btn_class }} w-100">
+            {{ label }}
+          </button>
+        </form>
+        {% empty %}
+        <p class="text-muted small">Aucune transition disponible.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header fw-semibold">Actions rapides</div>
+      <div class="card-body d-grid gap-2">
+        <a href="{% url 'youth:assessment' profile.pk %}" class="btn btn-sm btn-outline-success">
+          <i class="bi bi-clipboard-check"></i> Lancer l'évaluation
+        </a>
+        <a href="{% url 'guidance:plan-create' %}?youth={{ profile.pk }}" class="btn btn-sm btn-outline-warning">
+          <i class="bi bi-journal-plus"></i> Créer un plan
+        </a>
+        <a href="{% url 'mentorship:mentor-assign' profile.pk %}" class="btn btn-sm btn-outline-info">
+          <i class="bi bi-award"></i> Assigner un mentor
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

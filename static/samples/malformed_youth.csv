@@ -1,0 +1,9 @@
+first_name,last_name,date_of_birth,gender,governorate,education_level,interests
+Ahmed,Mansouri,2006-03-15,M,TUNIS,BAC,"Informatique,Santé"
+Mariem,Khelifi,not-a-date,F,SOUSSE,LICENCE,Commerce
+Youssef,Trabelsi,2000-07-22,M,INVALID_GOV,BAC_PLUS_2,Ingénierie
+Fatma,Ben Salah,2010-01-10,F,SFAX,MASTER,"Santé,Éducation"
+Karim,Chaabane,2005-09-30,X,TUNIS,BAC,Informatique
+Sonia,Gharbi,2007-04-18,F,NABEUL,INVALID_EDU,Tourisme
+Amine,Jebali,2008-11-05,M,BIZERTE,LYCEE,SECTEUR_INCONNU
+Rania,Hamdi,1990-06-25,F,GABES,LICENCE,"Commerce,Agriculture"

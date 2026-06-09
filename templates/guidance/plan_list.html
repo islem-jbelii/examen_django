@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Plans d'action — CareerPathTN{% endblock %}
+{% block page_title %}Plans d'action{% endblock %}
+{% block nav_plan_list %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item active">Plans d'action</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-journal-text me-2"></i>Plans d'action</h4>
+  {% if user.role == 'COUNSELOR' %}
+  <a href="{% url 'guidance:plan-create' %}" class="btn btn-sm btn-danger">
+    <i class="bi bi-journal-plus"></i> Nouveau plan
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="d-flex gap-2 align-items-end">
+      <div>
+        <label class="form-label small mb-1">Statut</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">Tous</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel"></i> Filtrer</button>
+      <a href="{% url 'guidance:plan-list' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i></a>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Jeune</th>
+            <th>Secteur cible</th>
+            <th>Statut</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Créé par</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for plan in plans %}
+          <tr>
+            <td>{{ plan.youth.user.get_full_name|default:plan.youth.user.username }}</td>
+            <td>{{ plan.target_sector }}</td>
+            <td>
+              <span class="badge {% if plan.status == 'ACTIVE' %}bg-success{% elif plan.status == 'VALIDATED' %}bg-primary{% elif plan.status == 'DRAFT' %}bg-warning text-dark{% elif plan.status == 'COMPLETED' %}bg-info{% else %}bg-secondary{% endif %}">
+                {{ plan.get_status_display }}
+              </span>
+            </td>
+            <td>{{ plan.start_date|date:"d/m/Y" }}</td>
+            <td>{{ plan.end_date|date:"d/m/Y" }}</td>
+            <td class="small text-muted">{{ plan.created_by.get_full_name|default:plan.created_by.username }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'guidance:plan-detail' plan.pk %}" class="btn btn-outline-primary" title="Voir">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if user.role == 'COUNSELOR' and plan.status == 'DRAFT' %}
+                <a href="{% url 'guidance:plan-validate' plan.pk %}" class="btn btn-outline-success" title="Valider">
+                  <i class="bi bi-check-circle"></i>
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              <i class="bi bi-journal-x display-6 d-block mb-2"></i>
+              Aucun plan d'action.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

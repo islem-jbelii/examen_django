@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ form_title }} — CareerPathTN{% endblock %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block nav_plan_create %}active{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:redirect' %}">Accueil</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'guidance:plan-list' %}">Plans d'action</a></li>
+    <li class="breadcrumb-item active">{{ form_title }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header fw-semibold">{{ form_title }}</div>
+      <div class="card-body">
+        <form method="post" novalidate id="planForm">
+          {% csrf_token %}
+          <input type="hidden" name="milestones_json" id="milestones_json" value="[]">
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ form.youth.label }} <span class="text-danger">*</span></label>
+            {{ form.youth }}
+            {% if form.youth.errors %}<div class="text-danger small mt-1">{{ form.youth.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">{{ form.objectives.label }} <span class="text-danger">*</span></label>
+            {{ form.objectives }}
+            {% if form.objectives.errors %}<div class="text-danger small mt-1">{{ form.objectives.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.target_sector.label }} <span class="text-danger">*</span></label>
+              {{ form.target_sector }}
+              {% if form.target_sector.errors %}<div class="text-danger small mt-1">{{ form.target_sector.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.target_career.label }}</label>
+              {{ form.target_career }}
+              {% if form.target_career.errors %}<div class="text-danger small mt-1">{{ form.target_career.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.start_date.label }} <span class="text-danger">*</span></label>
+              {{ form.start_date }}
+              {% if form.start_date.errors %}<div class="text-danger small mt-1">{{ form.start_date.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.end_date.label }} <span class="text-danger">*</span></label>
+              {{ form.end_date }}
+              {% if form.end_date.errors %}<div class="text-danger small mt-1">{{ form.end_date.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <!-- Dynamic milestones -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Jalons</label>
+            <div id="milestones-container"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="add-milestone">
+              <i class="bi bi-plus-circle"></i> Ajouter un jalon
+            </button>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-check-lg"></i> {{ submit_label }}
+            </button>
+            <a href="{% url 'guidance:plan-list' %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const container = document.getElementById('milestones-container');
+const hiddenInput = document.getElementById('milestones_json');
+let milestones = [];
+
+function renderMilestones() {
+  container.innerHTML = '';
+  milestones.forEach((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'input-group mb-2';
+    row.innerHTML = `
+      <input type="text" class="form-control" placeholder="Titre du jalon"
+             value="${m.title}" oninput="milestones[${i}].title=this.value;sync()">
+      <input type="date" class="form-control" style="max-width:160px"
+             value="${m.due_date}" oninput="milestones[${i}].due_date=this.value;sync()">
+      <div class="input-group-text">
+        <input type="checkbox" class="form-check-input mt-0" title="Complété"
+               ${m.done ? 'checked' : ''} onchange="milestones[${i}].done=this.checked;sync()">
+      </div>
+      <button type="button" class="btn btn-outline-danger" onclick="removeMilestone(${i})">
+        <i class="bi bi-trash"></i>
+      </button>`;
+    container.appendChild(row);
+  });
+  sync();
+}
+
+function sync() {
+  hiddenInput.value = JSON.stringify(milestones);
+}
+
+function removeMilestone(i) {
+  milestones.splice(i, 1);
+  renderMilestones();
+}
+
+document.getElementById('add-milestone').addEventListener('click', () => {
+  milestones.push({title: '', due_date: '', done: false});
+  renderMilestones();
+});
+
+// Init
+renderMilestones();
+</script>
+{% endblock %}
